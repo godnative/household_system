@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QDialog, QFormLayout, QLineEdit, QLabel, QComboBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
 from src.services.member_service import MemberService
 from src.services.household_service import HouseholdService
 from src.models import SessionLocal, Member
@@ -76,11 +76,12 @@ class MemberWidget(QWidget):
             db.close()
     
     def add_member(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('添加成员')
-        dialog.resize(450, 300)
+        # 创建对话框
+        dialog = Dialog('添加成员', '请输入成员信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         # 姓名
         name_edit = QLineEdit()
@@ -101,17 +102,16 @@ class MemberWidget(QWidget):
             db.close()
         layout.addRow('所属家庭:', household_combo)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(450, 300)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             name = name_edit.text().strip()
             id_number = id_number_edit.text().strip()
             household_id = household_combo.currentData()
@@ -120,21 +120,16 @@ class MemberWidget(QWidget):
                 try:
                     MemberService.create_member(db, name=name, id_number=id_number, household_id=household_id)
                     self.load_members()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def edit_member(self, member):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('编辑成员')
-        dialog.resize(450, 300)
+        # 创建对话框
+        dialog = Dialog('编辑成员', '请修改成员信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         # 姓名
         name_edit = QLineEdit(member.name)
@@ -157,17 +152,16 @@ class MemberWidget(QWidget):
             db.close()
         layout.addRow('所属家庭:', household_combo)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(450, 300)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             name = name_edit.text().strip()
             id_number = id_number_edit.text().strip()
             household_id = household_combo.currentData()
@@ -176,14 +170,8 @@ class MemberWidget(QWidget):
                 try:
                     MemberService.update_member(db, member.id, name=name, id_number=id_number, household_id=household_id)
                     self.load_members()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def delete_member(self, member):
         db = SessionLocal()

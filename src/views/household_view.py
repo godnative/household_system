@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QDialog, QFormLayout, QLineEdit, QLabel, QComboBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
 from src.services.household_service import HouseholdService
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Household
@@ -75,11 +75,12 @@ class HouseholdWidget(QWidget):
             db.close()
     
     def add_household(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('添加家庭')
-        dialog.resize(400, 250)
+        # 创建对话框
+        dialog = Dialog('添加家庭', '请输入家庭信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         # 家庭编号
         household_number_edit = QLineEdit()
@@ -96,17 +97,16 @@ class HouseholdWidget(QWidget):
             db.close()
         layout.addRow('所属村庄:', village_combo)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(400, 250)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             household_number = household_number_edit.text().strip()
             village_id = village_combo.currentData()
             if household_number and village_id:
@@ -114,21 +114,16 @@ class HouseholdWidget(QWidget):
                 try:
                     HouseholdService.create_household(db, village_id=village_id, household_code=household_number)
                     self.load_households()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def edit_household(self, household):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('编辑家庭')
-        dialog.resize(400, 250)
+        # 创建对话框
+        dialog = Dialog('编辑家庭', '请修改家庭信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         # 家庭编号
         household_number_edit = QLineEdit(household.household_code)
@@ -147,17 +142,16 @@ class HouseholdWidget(QWidget):
             db.close()
         layout.addRow('所属村庄:', village_combo)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(400, 250)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             household_number = household_number_edit.text().strip()
             village_id = village_combo.currentData()
             if household_number and village_id:
@@ -165,14 +159,8 @@ class HouseholdWidget(QWidget):
                 try:
                     HouseholdService.update_household(db, household.id, household_code=household_number, village_id=village_id)
                     self.load_households()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def delete_household(self, household):
         db = SessionLocal()

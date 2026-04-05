@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QDialog, QFormLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Village
 
@@ -73,11 +73,12 @@ class VillageWidget(QWidget):
             db.close()
     
     def add_village(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('添加村庄')
-        dialog.resize(400, 200)
+        # 创建对话框
+        dialog = Dialog('添加村庄', '请输入村庄信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         name_edit = QLineEdit()
         layout.addRow('村庄名称:', name_edit)
@@ -85,17 +86,16 @@ class VillageWidget(QWidget):
         code_edit = QLineEdit()
         layout.addRow('村庄代码:', code_edit)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(400, 200)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             name = name_edit.text().strip()
             code = code_edit.text().strip()
             if name and code:
@@ -103,21 +103,16 @@ class VillageWidget(QWidget):
                 try:
                     VillageService.create_village(db, name=name, code=code)
                     self.load_villages()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def edit_village(self, village):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('编辑村庄')
-        dialog.resize(400, 200)
+        # 创建对话框
+        dialog = Dialog('编辑村庄', '请修改村庄信息', self)
         
-        layout = QFormLayout(dialog)
+        # 创建内容 widget
+        content = QWidget()
+        layout = QFormLayout(content)
         
         name_edit = QLineEdit(village.name)
         layout.addRow('村庄名称:', name_edit)
@@ -125,17 +120,16 @@ class VillageWidget(QWidget):
         code_edit = QLineEdit(village.code)
         layout.addRow('村庄代码:', code_edit)
         
-        btn_layout = QHBoxLayout()
-        ok_btn = PrimaryPushButton('确定')
-        cancel_btn = PushButton('取消')
+        # 替换对话框内容
+        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        dialog.contentLabel.deleteLater()
+        dialog.vBoxLayout.insertWidget(1, content)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
+        # 调整对话框大小
+        dialog.resize(400, 200)
         
-        layout.addRow(btn_layout)
-        
-        def on_ok():
+        # 处理对话框结果
+        if dialog.exec():
             name = name_edit.text().strip()
             code = code_edit.text().strip()
             if name and code:
@@ -143,14 +137,8 @@ class VillageWidget(QWidget):
                 try:
                     VillageService.update_village(db, village.id, name=name, code=code)
                     self.load_villages()
-                    dialog.accept()
                 finally:
                     db.close()
-        
-        ok_btn.clicked.connect(on_ok)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        dialog.exec_()
     
     def delete_village(self, village):
         db = SessionLocal()
