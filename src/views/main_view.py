@@ -2,9 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 from qfluentwidgets import MSFluentWindow, NavigationItemPosition, FluentIcon as FIF
 from src.views.village_view import VillageWidget
-from src.views.household_view import HouseholdWidget
-from src.views.member_view import MemberWidget
-from src.views.view_window import ViewWindow
+from src.views.household_management_view import HouseholdManagementWidget
 from src.services.auth_service import AuthService
 
 class MainView(MSFluentWindow):
@@ -47,22 +45,10 @@ class MainView(MSFluentWindow):
             self.addSubInterface(village_page, FIF.HOME, '村管理')
         
         # 家庭管理
-        if AuthService.check_permission(self.user, 'household_manage'):
-            household_page = HouseholdWidget(self)
-            household_page.setObjectName('household')
-            self.addSubInterface(household_page, FIF.HOME, '家庭管理')
-        
-        # 成员管理
-        if AuthService.check_permission(self.user, 'member_manage'):
-            member_page = MemberWidget(self)
-            member_page.setObjectName('member')
-            self.addSubInterface(member_page, FIF.PEOPLE, '成员管理')
-        
-        # 查看窗口
-        if AuthService.check_permission(self.user, 'village_manage'):
-            view_page = ViewWindow(self)
-            view_page.setObjectName('view')
-            self.addSubInterface(view_page, FIF.HOME, '查看窗口')
+        if AuthService.check_permission(self.user, 'household_manage') or AuthService.check_permission(self.user, 'member_manage'):
+            household_management_page = HouseholdManagementWidget(self)
+            household_management_page.setObjectName('household_management')
+            self.addSubInterface(household_management_page, FIF.HOME, '家庭管理')
         
         # 退出按钮
         self.navigationInterface.addItem(
