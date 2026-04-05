@@ -52,12 +52,16 @@ class VillageWidget(QWidget):
         return os.path.join(self.photo_dir, photo_filename)
     
     def init_ui(self):
-        layout = QVBoxLayout(self)
+        # 主布局改为水平布局
+        main_layout = QHBoxLayout(self)
+        
+        # 左侧布局（村庄列表）
+        left_layout = QVBoxLayout()
         
         # 标题
         title_label = QLabel('村庄管理')
         title_label.setStyleSheet('font-size: 18px; font-weight: bold;')
-        layout.addWidget(title_label)
+        left_layout.addWidget(title_label)
         
         # 操作按钮
         btn_layout = QHBoxLayout()
@@ -69,7 +73,7 @@ class VillageWidget(QWidget):
         refresh_btn.clicked.connect(self.load_villages)
         btn_layout.addWidget(refresh_btn)
         
-        layout.addLayout(btn_layout)
+        left_layout.addLayout(btn_layout)
         
         # 表格
         self.table = TableWidget()
@@ -81,7 +85,67 @@ class VillageWidget(QWidget):
         self.table.verticalHeader().hide()
         # 设置行高
         self.table.verticalHeader().setDefaultSectionSize(60)
-        layout.addWidget(self.table)
+        left_layout.addWidget(self.table)
+        
+        # 连接表格选择事件
+        self.table.itemSelectionChanged.connect(self.on_village_selected)
+        
+        # 右侧布局（详细信息）
+        right_layout = QVBoxLayout()
+        
+        # 详细信息标题
+        detail_title = QLabel('村庄详细信息')
+        detail_title.setStyleSheet('font-size: 16px; font-weight: bold;')
+        right_layout.addWidget(detail_title)
+        
+        # 详细信息内容
+        self.detail_widget = QWidget()
+        self.detail_layout = QFormLayout(self.detail_widget)
+        
+        # 村庄名称
+        self.name_label = QLabel()
+        self.name_label.setStyleSheet('font-weight: 500;')
+        self.detail_layout.addRow('村庄名称:', self.name_label)
+        
+        # 建立日期
+        self.establishment_date_label = QLabel()
+        self.establishment_date_label.setStyleSheet('font-weight: 500;')
+        self.detail_layout.addRow('建立日期:', self.establishment_date_label)
+        
+        # 村庄神父
+        self.village_priest_label = QLabel()
+        self.village_priest_label.setStyleSheet('font-weight: 500;')
+        self.detail_layout.addRow('村庄神父:', self.village_priest_label)
+        
+        # 村庄地址
+        self.address_label = QLabel()
+        self.address_label.setStyleSheet('font-weight: 500;')
+        self.address_label.setWordWrap(True)
+        self.detail_layout.addRow('村庄地址:', self.address_label)
+        
+        # 村庄简介
+        self.description_label = QLabel()
+        self.description_label.setStyleSheet('font-weight: 500;')
+        self.description_label.setWordWrap(True)
+        self.description_label.setMinimumHeight(80)
+        self.detail_layout.addRow('村庄简介:', self.description_label)
+        
+        # 村庄照片
+        self.photo_label = QLabel('暂无图片')
+        self.photo_label.setFixedSize(200, 200)
+        self.photo_label.setStyleSheet('border: 1px solid #ddd;')
+        self.photo_label.setAlignment(Qt.AlignCenter)
+        self.detail_layout.addRow('村庄照片:', self.photo_label)
+        
+        # 初始状态下禁用详细信息
+        self.detail_widget.setEnabled(False)
+        
+        right_layout.addWidget(self.detail_widget)
+        right_layout.addStretch()
+        
+        # 添加左右布局到主布局
+        main_layout.addLayout(left_layout, 1)
+        main_layout.addLayout(right_layout, 1)
     
     def load_villages(self):
         # 清空表格
@@ -114,6 +178,63 @@ class VillageWidget(QWidget):
             self.table.resizeColumnsToContents()
         finally:
             db.close()
+    
+    def on_village_selected(self):
+        """处理村庄选择事件，更新详细信息"""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            # 无选择时清空详细信息
+            self.clear_detail_info()
+            self.detail_widget.setEnabled(False)
+            return
+        
+        # 获取选中的村庄ID
+        selected_row = selected_items[0].row()
+        village_id = int(self.table.item(selected_row, 0).text())
+        
+        # 从数据库获取村庄详情
+        db = SessionLocal()
+        try:
+            village = VillageService.get_village_by_id(db, village_id)
+            if village:
+                # 更新详细信息
+                self.name_label.setText(village.name)
+                self.establishment_date_label.setText(str(village.establishment_date))
+                self.village_priest_label.setText(village.village_priest)
+                self.address_label.setText(village.address)
+                self.description_label.setText(village.description or '无')
+                
+                # 更新照片
+                if village.photo:
+                    photo_path = self.get_photo_path(village.photo)
+                    if photo_path and os.path.exists(photo_path):
+                        pixmap = QPixmap(photo_path)
+                        pixmap = pixmap.scaled(200, 200, Qt.KeepAspectRatio)
+                        self.photo_label.setPixmap(pixmap)
+                        self.photo_label.setText('')
+                    else:
+                        self.photo_label.setText('暂无图片')
+                else:
+                    self.photo_label.setText('暂无图片')
+                
+                # 启用详细信息面板
+                self.detail_widget.setEnabled(True)
+            else:
+                self.clear_detail_info()
+                self.detail_widget.setEnabled(False)
+        finally:
+            db.close()
+    
+    def clear_detail_info(self):
+        """清空详细信息"""
+        self.name_label.setText('')
+        self.establishment_date_label.setText('')
+        self.village_priest_label.setText('')
+        self.address_label.setText('')
+        self.description_label.setText('')
+        self.photo_label.setText('暂无图片')
+        self.photo_label.clear()
+        self.photo_label.setText('暂无图片')
     
     def add_village(self):
         # 创建对话框
