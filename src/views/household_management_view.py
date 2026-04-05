@@ -1,29 +1,14 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit, QStackedWidget
 from PyQt5.QtCore import Qt
 from functools import partial
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView, TabBar, TabCloseButtonDisplayMode
 from src.services.household_service import HouseholdService
 from src.services.member_service import MemberService
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Household, Member
 from sqlalchemy.exc import IntegrityError
 
-class MemberCard(ElevatedCardWidget):
-    """ 成员卡片 """
 
-    def __init__(self, member, parent=None):
-        super().__init__(parent)
-        self.member = member
-        
-        self.nameLabel = BodyLabel(member.name, self)
-        self.idNumberLabel = CaptionLabel(member.id_number, self)
-        
-        self.vBoxLayout = QVBoxLayout(self)
-        self.vBoxLayout.setAlignment(Qt.AlignCenter)
-        self.vBoxLayout.addWidget(self.nameLabel, 0, Qt.AlignCenter)
-        self.vBoxLayout.addWidget(self.idNumberLabel, 0, Qt.AlignCenter)
-        
-        self.setFixedSize(168, 120)
 
 class HouseholdManagementWidget(QWidget):
     def __init__(self, parent=None):
@@ -33,6 +18,9 @@ class HouseholdManagementWidget(QWidget):
     
     def init_ui(self):
         layout = QVBoxLayout(self)
+
+        self.householdlayoutratio = 42
+        self.memberlayoutratio    = 100 - self.householdlayoutratio
         
         # 顶部村庄选择（占10%高度）
         village_layout = QHBoxLayout()
@@ -71,14 +59,14 @@ class HouseholdManagementWidget(QWidget):
         self.household_table.setBorderVisible(True)
         self.household_table.setBorderRadius(8)
         self.household_table.setWordWrap(False)
-        self.household_table.setColumnCount(5)
-        self.household_table.setHorizontalHeaderLabels(['ID', '家庭编号', '村庄', '操作'])
+        self.household_table.setColumnCount(4)
+        self.household_table.setHorizontalHeaderLabels(['ID', '家庭编号', '户主', '操作'])
         self.household_table.verticalHeader().hide()
         self.household_table.verticalHeader().setDefaultSectionSize(60)
         self.household_table.itemClicked.connect(self.on_household_clicked)
         left_layout.addWidget(self.household_table)
         
-        main_layout.addLayout(left_layout, 1)
+        main_layout.addLayout(left_layout, self.householdlayoutratio)
         
         # 右侧成员管理模块
         right_layout = QVBoxLayout()
@@ -100,17 +88,22 @@ class HouseholdManagementWidget(QWidget):
         
         right_layout.addLayout(member_title_layout)
         
-        # 成员卡片容器（可滚动）
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
+        # 成员标签栏
+        self.tab_bar = TabBar(self)
+        self.tab_bar.setMovable(True)
+        self.tab_bar.setTabMaximumWidth(220)
+        self.tab_bar.setTabShadowEnabled(False)
+        self.tab_bar.setScrollable(True)
+        self.tab_bar.setCloseButtonDisplayMode(TabCloseButtonDisplayMode.ON_HOVER)
+        self.tab_bar.tabCloseRequested.connect(self.on_tab_close_requested)
+        self.tab_bar.currentChanged.connect(self.on_tab_changed)
+        right_layout.addWidget(self.tab_bar)
         
-        self.member_container = QWidget()
-        self.member_layout = FlowLayout(self.member_container)
+        # 标签内容堆叠窗口
+        self.stacked_widget = QStackedWidget(self)
+        right_layout.addWidget(self.stacked_widget)
         
-        self.scroll_area.setWidget(self.member_container)
-        right_layout.addWidget(self.scroll_area)
-        
-        main_layout.addLayout(right_layout, 1)
+        main_layout.addLayout(right_layout, self.memberlayoutratio)
         
         layout.addLayout(main_layout)
     
@@ -144,6 +137,34 @@ class HouseholdManagementWidget(QWidget):
             self.load_members(household_id)
             self.add_member_btn.setEnabled(True)
     
+    def on_tab_changed(self, index):
+        """ 标签切换时的处理 """
+        if index >= 0:
+            self.stacked_widget.setCurrentIndex(index)
+    
+    def on_tab_close_requested(self, index):
+        """ 标签关闭时的处理 """
+        # 获取成员ID
+        if index < len(self.tab_bar.items):
+            tab_item = self.tab_bar.items[index]
+            if tab_item:
+                member_id = tab_item.property('member_id')
+                if member_id:
+                    # 确认删除
+                    dialog = Dialog('确认删除', f'确定要删除成员吗？', self)
+                    if dialog.exec():
+                        # 删除成员
+                        db = SessionLocal()
+                        try:
+                            if MemberService.delete_member(db, member_id):
+                                # 移除标签和内容页面
+                                self.tab_bar.removeTab(index)
+                                widget = self.stacked_widget.widget(index)
+                                self.stacked_widget.removeWidget(widget)
+                                widget.deleteLater()
+                        finally:
+                            db.close()
+    
     def load_households(self, village_id=None):
         """ 加载家庭数据 """
         # 清空表格
@@ -160,7 +181,7 @@ class HouseholdManagementWidget(QWidget):
                 self.household_table.insertRow(i)
                 self.household_table.setItem(i, 0, QTableWidgetItem(str(household.id)))
                 self.household_table.setItem(i, 1, QTableWidgetItem(household.household_code))
-                self.household_table.setItem(i, 2, QTableWidgetItem(household.village.name if household.village else ''))
+                self.household_table.setItem(i, 2, QTableWidgetItem(household.head_of_household if household.head_of_household else '无'))
                 
                 # 操作按钮
                 btn_layout = QHBoxLayout()
@@ -456,18 +477,16 @@ class HouseholdManagementWidget(QWidget):
             db.close()
     
     def clear_member_cards(self):
-        """ 清空成员卡片 """
-        # 清空布局
-        while self.member_layout.count() > 0:
-            item = self.member_layout.takeAt(0)
-            # 检查 item 是否有 widget() 方法
-            if hasattr(item, 'widget'):
-                widget = item.widget()
-            else:
-                # FlowLayout 的 takeAt() 直接返回 widget
-                widget = item
-            if widget:
-                widget.deleteLater()
+        """ 清空成员标签 """
+        # 清空标签栏
+        while self.tab_bar.count() > 0:
+            self.tab_bar.removeTab(0)
+        
+        # 清空堆叠窗口
+        while self.stacked_widget.count() > 0:
+            widget = self.stacked_widget.widget(0)
+            self.stacked_widget.removeWidget(widget)
+            widget.deleteLater()
     
     def refresh_all(self):
         """ 刷新所有数据 """
@@ -479,7 +498,7 @@ class HouseholdManagementWidget(QWidget):
         if not household_id:
             return
         
-        # 清空成员卡片
+        # 清空成员标签
         self.clear_member_cards()
         
         # 加载成员数据
@@ -487,9 +506,37 @@ class HouseholdManagementWidget(QWidget):
         try:
             members = MemberService.get_all_members(db, household_id=household_id)
             for member in members:
-                card = MemberCard(member)
-                card.clicked.connect(partial(self.edit_member, member))
-                self.member_layout.addWidget(card)
+                # 创建标签
+                tab_item = self.tab_bar.addTab(str(member.id), member.name)
+                
+                # 创建标签内容页面
+                member_widget = QWidget()
+                layout = QVBoxLayout(member_widget)
+                
+                # 添加成员详细信息
+                info_layout = QFormLayout()
+                info_layout.addRow('姓名:', QLabel(member.name))
+                info_layout.addRow('性别:', QLabel(member.gender if member.gender else '无'))
+                info_layout.addRow('出生日期:', QLabel(str(member.birth_date) if member.birth_date else '无'))
+                info_layout.addRow('身份证号:', QLabel(member.id_number))
+                info_layout.addRow('与户主关系:', QLabel(member.relation_to_head if member.relation_to_head else '无'))
+                info_layout.addRow('状态:', QLabel(member.status if member.status else '无'))
+                
+                # 添加修改按钮
+                edit_btn = PrimaryPushButton('修改成员信息')
+                edit_btn.clicked.connect(partial(self.edit_member, member))
+                
+                layout.addLayout(info_layout)
+                layout.addWidget(edit_btn)
+                layout.addStretch()
+                
+                # 添加到堆叠窗口
+                self.stacked_widget.addWidget(member_widget)
+                
+                # 连接标签和内容页面
+                # 保存成员ID到标签项的属性中
+                if tab_item:
+                    tab_item.setProperty('member_id', member.id)
         finally:
             db.close()
     
@@ -560,7 +607,7 @@ class HouseholdManagementWidget(QWidget):
             if name and id_number:
                 db = SessionLocal()
                 try:
-                    MemberService.create_member(
+                    new_member = MemberService.create_member(
                         db, 
                         household_id=household_id, 
                         name=name, 
@@ -570,7 +617,41 @@ class HouseholdManagementWidget(QWidget):
                         relation_to_head=relation_to_head, 
                         status=status
                     )
-                    self.load_members(household_id)
+                    # 创建新标签
+                    tab_item = self.tab_bar.addTab(str(new_member.id), new_member.name)
+                    
+                    # 创建标签内容页面
+                    member_widget = QWidget()
+                    layout = QVBoxLayout(member_widget)
+                    
+                    # 添加成员详细信息
+                    info_layout = QFormLayout()
+                    info_layout.addRow('姓名:', QLabel(new_member.name))
+                    info_layout.addRow('性别:', QLabel(new_member.gender if new_member.gender else '无'))
+                    info_layout.addRow('出生日期:', QLabel(str(new_member.birth_date) if new_member.birth_date else '无'))
+                    info_layout.addRow('身份证号:', QLabel(new_member.id_number))
+                    info_layout.addRow('与户主关系:', QLabel(new_member.relation_to_head if new_member.relation_to_head else '无'))
+                    info_layout.addRow('状态:', QLabel(new_member.status if new_member.status else '无'))
+                    
+                    # 添加修改按钮
+                    edit_btn = PrimaryPushButton('修改成员信息')
+                    edit_btn.clicked.connect(partial(self.edit_member, new_member))
+                    
+                    layout.addLayout(info_layout)
+                    layout.addWidget(edit_btn)
+                    layout.addStretch()
+                    
+                    # 添加到堆叠窗口
+                    self.stacked_widget.addWidget(member_widget)
+                    
+                    # 连接标签和内容页面
+                    # 保存成员ID到标签项的属性中
+                    if tab_item:
+                        tab_item.setProperty('member_id', new_member.id)
+                    
+                    # 切换到新标签
+                    # 新添加的标签在最后，所以索引是count-1
+                    self.tab_bar.setCurrentIndex(self.tab_bar.count() - 1)
                 except IntegrityError:
                     db.rollback()
                     InfoBar.error(
@@ -670,7 +751,8 @@ class HouseholdManagementWidget(QWidget):
             if name and id_number:
                 db = SessionLocal()
                 try:
-                    MemberService.update_member(
+                    # 更新成员信息
+                    updated_member = MemberService.update_member(
                         db, 
                         member.id, 
                         name=name, 
@@ -680,7 +762,43 @@ class HouseholdManagementWidget(QWidget):
                         relation_to_head=relation_to_head, 
                         status=status
                     )
-                    self.load_members(member.household_id)
+                    
+                    # 更新标签名称（如果修改了姓名）
+                    for i in range(self.tab_bar.count()):
+                        if i < len(self.tab_bar.items):
+                            tab_item = self.tab_bar.items[i]
+                            if tab_item and tab_item.property('member_id') == member.id:
+                                if name != member.name:
+                                    self.tab_bar.setTabText(i, name)
+                                
+                                # 更新标签内容
+                                widget = self.stacked_widget.widget(i)
+                                if widget:
+                                    # 清空原有内容
+                                    for child in widget.children():
+                                        if hasattr(child, 'close'):
+                                            child.close()
+                                    
+                                    # 重新创建布局
+                                    layout = QVBoxLayout(widget)
+                                    
+                                    # 添加成员详细信息
+                                    info_layout = QFormLayout()
+                                    info_layout.addRow('姓名:', QLabel(updated_member.name))
+                                    info_layout.addRow('性别:', QLabel(updated_member.gender if updated_member.gender else '无'))
+                                    info_layout.addRow('出生日期:', QLabel(str(updated_member.birth_date) if updated_member.birth_date else '无'))
+                                    info_layout.addRow('身份证号:', QLabel(updated_member.id_number))
+                                    info_layout.addRow('与户主关系:', QLabel(updated_member.relation_to_head if updated_member.relation_to_head else '无'))
+                                    info_layout.addRow('状态:', QLabel(updated_member.status if updated_member.status else '无'))
+                                    
+                                    # 添加修改按钮
+                                    edit_btn = PrimaryPushButton('修改成员信息')
+                                    edit_btn.clicked.connect(partial(self.edit_member, updated_member))
+                                    
+                                    layout.addLayout(info_layout)
+                                    layout.addWidget(edit_btn)
+                                    layout.addStretch()
+                                break
                 except IntegrityError:
                     db.rollback()
                     InfoBar.error(
