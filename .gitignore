@@ -1,0 +1,24 @@
+# 忽略Python缓存文件
+__pycache__/
+*.pyc
+
+# 忽略构建和分发目录
+build/
+dist/
+
+# 忽略Trae相关文件
+.trae/
+
+# 忽略数据库文件
+data/
+
+# 忽略PyInstaller生成的文件
+app.spec
+
+# 忽略IDE相关文件
+.vscode/
+.idea/
+
+# 忽略操作系统相关文件
+Thumbs.db
+.DS_Store
