@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit
 from PyQt5.QtCore import Qt
+from functools import partial
 from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView
 from src.services.household_service import HouseholdService
 from src.services.member_service import MemberService
@@ -364,7 +365,7 @@ class HouseholdManagementWidget(QWidget):
             members = MemberService.get_all_members(db, household_id=household_id)
             for member in members:
                 card = MemberCard(member)
-                card.clicked.connect(lambda _, m=member: self.edit_member(m))
+                card.clicked.connect(partial(self.edit_member, member))
                 self.member_layout.addWidget(card)
         finally:
             db.close()
