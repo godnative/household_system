@@ -9,7 +9,11 @@ class Village(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     code = Column(String(20), unique=True, nullable=False, index=True)
+    establishment_date = Column(Date, nullable=False)
+    village_priest = Column(String(50), nullable=False)
+    address = Column(String(200), nullable=False)
     description = Column(Text)
+    photo = Column(String(255))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     

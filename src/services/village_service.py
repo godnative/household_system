@@ -26,9 +26,17 @@ class VillageService:
         return query.all()
     
     @staticmethod
-    def create_village(db: Session, name: str, code: str, description: str = None) -> Village:
+    def create_village(db: Session, name: str, code: str, establishment_date, village_priest: str, address: str, description: str = None, photo: str = None) -> Village:
         """创建新村"""
-        village = Village(name=name, code=code, description=description)
+        village = Village(
+            name=name, 
+            code=code, 
+            establishment_date=establishment_date, 
+            village_priest=village_priest, 
+            address=address, 
+            description=description, 
+            photo=photo
+        )
         db.add(village)
         db.commit()
         db.refresh(village)
@@ -53,6 +61,10 @@ class VillageService:
         """删除村"""
         village = db.query(Village).filter(Village.id == village_id).first()
         if not village:
+            return False
+        
+        # 检查是否有家庭
+        if village.households:
             return False
         
         db.delete(village)

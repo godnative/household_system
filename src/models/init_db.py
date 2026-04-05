@@ -47,9 +47,13 @@ def init_database():
             db.commit()
             
             # 创建默认村
+            from datetime import date
             default_village = Village(
                 name='默认村',
                 code='001',
+                establishment_date=date.today(),
+                village_priest='默认神父',
+                address='默认地址',
                 description='系统默认村'
             )
             db.add(default_village)

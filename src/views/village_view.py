@@ -1,15 +1,55 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QDateEdit, QTextEdit, QFileDialog
+from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtGui import QPixmap
 from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Village
 from sqlalchemy.exc import IntegrityError
+from PIL import Image
+import os
+import shutil
+import time
 
 class VillageWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        # 初始化照片存储目录
+        self.photo_dir = os.path.join(os.path.dirname(__file__), '..', 'static', 'village_photos')
+        if not os.path.exists(self.photo_dir):
+            os.makedirs(self.photo_dir)
         self.init_ui()
         self.load_villages()
+    
+    def save_photo(self, photo_path):
+        """保存照片并调整尺寸"""
+        if not photo_path:
+            return None
+        
+        try:
+            # 生成唯一文件名
+            filename = f"village_{int(time.time())}_{os.path.basename(photo_path)}"
+            save_path = os.path.join(self.photo_dir, filename)
+            
+            # 调整照片尺寸
+            img = Image.open(photo_path)
+            max_width = 800
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
+            
+            # 保存照片
+            img.save(save_path)
+            return os.path.basename(filename)
+        except Exception as e:
+            print(f"保存照片失败: {e}")
+            return None
+    
+    def get_photo_path(self, photo_filename):
+        """获取照片完整路径"""
+        if not photo_filename:
+            return None
+        return os.path.join(self.photo_dir, photo_filename)
     
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -86,8 +126,43 @@ class VillageWidget(QWidget):
         name_edit = QLineEdit()
         layout.addRow('村庄名称:', name_edit)
         
-        code_edit = QLineEdit()
-        layout.addRow('村庄代码:', code_edit)
+        # 新增字段
+        establishment_date_edit = QDateEdit()
+        establishment_date_edit.setCalendarPopup(True)
+        establishment_date_edit.setDate(QDate.currentDate())
+        layout.addRow('建立日期:', establishment_date_edit)
+        
+        village_priest_edit = QLineEdit()
+        layout.addRow('村庄神父:', village_priest_edit)
+        
+        address_edit = QLineEdit()
+        layout.addRow('村庄地址:', address_edit)
+        
+        description_edit = QTextEdit()
+        layout.addRow('村庄简介:', description_edit)
+        
+        # 照片上传
+        photo_layout = QHBoxLayout()
+        photo_label = QLabel('暂无图片')
+        photo_label.setFixedSize(100, 100)
+        photo_label.setStyleSheet('border: 1px solid #ddd;')
+        photo_layout.addWidget(photo_label)
+        
+        photo_path = None
+        def select_photo():
+            nonlocal photo_path
+            file_path, _ = QFileDialog.getOpenFileName(self, '选择照片', '', 'Image Files (*.jpg *.jpeg *.png *.bmp)')
+            if file_path:
+                photo_path = file_path
+                pixmap = QPixmap(file_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+        
+        photo_btn = PushButton('选择照片')
+        photo_btn.clicked.connect(select_photo)
+        photo_layout.addWidget(photo_btn)
+        layout.addRow('村庄照片:', photo_layout)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -95,22 +170,49 @@ class VillageWidget(QWidget):
         dialog.vBoxLayout.insertWidget(1, content)
         
         # 调整对话框大小
-        dialog.resize(400, 200)
+        dialog.resize(500, 400)
         
         # 处理对话框结果
         if dialog.exec():
             name = name_edit.text().strip()
-            code = code_edit.text().strip()
-            if name and code:
+            establishment_date = establishment_date_edit.date().toPyDate()
+            village_priest = village_priest_edit.text().strip()
+            address = address_edit.text().strip()
+            description = description_edit.toPlainText().strip()
+            
+            if name and village_priest and address:
                 db = SessionLocal()
                 try:
-                    VillageService.create_village(db, name=name, code=code)
+                    # 自动生成村庄代码
+                    import time
+                    code = f"V{int(time.time())}"
+                    
+                    # 保存照片
+                    photo_filename = self.save_photo(photo_path)
+                    VillageService.create_village(
+                        db, 
+                        name=name, 
+                        code=code, 
+                        establishment_date=establishment_date,
+                        village_priest=village_priest,
+                        address=address,
+                        description=description,
+                        photo=photo_filename
+                    )
                     self.load_villages()
                 except IntegrityError:
                     db.rollback()
                     InfoBar.error(
                         title='添加失败',
                         content='村庄代码已存在，请使用其他代码',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
+                except Exception as e:
+                    db.rollback()
+                    InfoBar.error(
+                        title='添加失败',
+                        content=f'添加村庄失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -128,8 +230,61 @@ class VillageWidget(QWidget):
         name_edit = QLineEdit(village.name)
         layout.addRow('村庄名称:', name_edit)
         
-        code_edit = QLineEdit(village.code)
-        layout.addRow('村庄代码:', code_edit)
+        # 新增字段
+        establishment_date_edit = QDateEdit()
+        establishment_date_edit.setCalendarPopup(True)
+        if village.establishment_date:
+            establishment_date_edit.setDate(QDate.fromString(str(village.establishment_date), 'yyyy-MM-dd'))
+        else:
+            establishment_date_edit.setDate(QDate.currentDate())
+        layout.addRow('建立日期:', establishment_date_edit)
+        
+        village_priest_edit = QLineEdit(village.village_priest)
+        layout.addRow('村庄神父:', village_priest_edit)
+        
+        address_edit = QLineEdit(village.address)
+        layout.addRow('村庄地址:', address_edit)
+        
+        description_edit = QTextEdit(village.description or '')
+        layout.addRow('村庄简介:', description_edit)
+        
+        # 照片上传
+        photo_layout = QHBoxLayout()
+        photo_label = QLabel('暂无图片')
+        photo_label.setFixedSize(100, 100)
+        photo_label.setStyleSheet('border: 1px solid #ddd;')
+        
+        # 显示现有照片
+        if village.photo:
+            print(f"Village photo filename: {village.photo}")
+            photo_path = self.get_photo_path(village.photo)
+            print(f"Photo path: {photo_path}")
+            if photo_path and os.path.exists(photo_path):
+                print(f"Photo exists: {os.path.exists(photo_path)}")
+                pixmap = QPixmap(photo_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+            else:
+                print(f"Photo not found: {photo_path}")
+        
+        photo_layout.addWidget(photo_label)
+        
+        photo_path = None
+        def select_photo():
+            nonlocal photo_path
+            file_path, _ = QFileDialog.getOpenFileName(self, '选择照片', '', 'Image Files (*.jpg *.jpeg *.png *.bmp)')
+            if file_path:
+                photo_path = file_path
+                pixmap = QPixmap(file_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+        
+        photo_btn = PushButton('选择照片')
+        photo_btn.clicked.connect(select_photo)
+        photo_layout.addWidget(photo_btn)
+        layout.addRow('村庄照片:', photo_layout)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -137,16 +292,31 @@ class VillageWidget(QWidget):
         dialog.vBoxLayout.insertWidget(1, content)
         
         # 调整对话框大小
-        dialog.resize(400, 200)
+        dialog.resize(500, 400)
         
         # 处理对话框结果
         if dialog.exec():
             name = name_edit.text().strip()
-            code = code_edit.text().strip()
-            if name and code:
+            establishment_date = establishment_date_edit.date().toPyDate()
+            village_priest = village_priest_edit.text().strip()
+            address = address_edit.text().strip()
+            description = description_edit.toPlainText().strip()
+            
+            if name and village_priest and address:
                 db = SessionLocal()
                 try:
-                    VillageService.update_village(db, village.id, name=name, code=code)
+                    # 保存照片
+                    photo_filename = self.save_photo(photo_path) if photo_path else village.photo
+                    VillageService.update_village(
+                        db, 
+                        village.id, 
+                        name=name, 
+                        establishment_date=establishment_date,
+                        village_priest=village_priest,
+                        address=address,
+                        description=description,
+                        photo=photo_filename
+                    )
                     self.load_villages()
                 except IntegrityError:
                     db.rollback()
@@ -156,12 +326,35 @@ class VillageWidget(QWidget):
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
+                except Exception as e:
+                    db.rollback()
+                    InfoBar.error(
+                        title='修改失败',
+                        content=f'修改村庄失败: {str(e)}',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     
     def delete_village(self, village):
         db = SessionLocal()
         try:
+            # 重新从数据库获取村庄对象，避免DetachedInstanceError
+            village_obj = VillageService.get_village_by_id(db, village.id)
+            if not village_obj:
+                return
+            
+            # 检查是否有家庭
+            if village_obj.households:
+                InfoBar.error(
+                    title='删除失败',
+                    content='该村庄下有家庭，需删除所有家庭后才能删除村庄',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
             if VillageService.delete_village(db, village.id):
                 self.load_villages()
         finally:

@@ -125,6 +125,18 @@ class ViewWindow(QWidget):
         if household_id:
             self.load_members(household_id)
     
+    def clear_member_cards(self):
+        """ 清空成员卡片 """
+        # 移除旧的容器
+        if hasattr(self, 'member_container'):
+            self.right_layout.removeWidget(self.member_container)
+            self.member_container.deleteLater()
+        
+        # 创建新的空容器
+        self.member_container = QWidget()
+        self.member_layout = FlowLayout(self.member_container)
+        self.right_layout.addWidget(self.member_container)
+    
     def load_members(self, household_id):
         """ 加载成员数据 """
         db = SessionLocal()
