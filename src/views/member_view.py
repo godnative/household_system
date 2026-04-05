@@ -39,6 +39,8 @@ class MemberWidget(QWidget):
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(['ID', '姓名', '身份证号', '家庭', '操作'])
         self.table.verticalHeader().hide()
+        # 设置行高
+        self.table.verticalHeader().setDefaultSectionSize(60)
         layout.addWidget(self.table)
     
     def load_members(self):

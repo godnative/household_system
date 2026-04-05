@@ -38,6 +38,8 @@ class VillageWidget(QWidget):
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(['ID', '村庄名称', '操作'])
         self.table.verticalHeader().hide()
+        # 设置行高
+        self.table.verticalHeader().setDefaultSectionSize(60)
         layout.addWidget(self.table)
     
     def load_villages(self):

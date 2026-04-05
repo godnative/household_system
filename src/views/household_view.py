@@ -39,6 +39,8 @@ class HouseholdWidget(QWidget):
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(['ID', '家庭编号', '村庄', '操作'])
         self.table.verticalHeader().hide()
+        # 设置行高
+        self.table.verticalHeader().setDefaultSectionSize(60)
         layout.addWidget(self.table)
     
     def load_households(self):
