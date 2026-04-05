@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Village
+from sqlalchemy.exc import IntegrityError
 
 class VillageWidget(QWidget):
     def __init__(self, parent=None):
@@ -105,6 +106,14 @@ class VillageWidget(QWidget):
                 try:
                     VillageService.create_village(db, name=name, code=code)
                     self.load_villages()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='添加失败',
+                        content='村庄代码已存在，请使用其他代码',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     
@@ -139,6 +148,14 @@ class VillageWidget(QWidget):
                 try:
                     VillageService.update_village(db, village.id, name=name, code=code)
                     self.load_villages()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='修改失败',
+                        content='村庄代码已存在，请使用其他代码',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     

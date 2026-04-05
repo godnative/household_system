@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition
 from src.services.member_service import MemberService
 from src.services.household_service import HouseholdService
 from src.models import SessionLocal, Member
+from sqlalchemy.exc import IntegrityError
 
 class MemberWidget(QWidget):
     def __init__(self, parent=None):
@@ -122,6 +123,14 @@ class MemberWidget(QWidget):
                 try:
                     MemberService.create_member(db, name=name, id_number=id_number, household_id=household_id)
                     self.load_members()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='添加失败',
+                        content='身份证号已存在，请使用其他身份证号',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     
@@ -172,6 +181,14 @@ class MemberWidget(QWidget):
                 try:
                     MemberService.update_member(db, member.id, name=name, id_number=id_number, household_id=household_id)
                     self.load_members()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='修改失败',
+                        content='身份证号已存在，请使用其他身份证号',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     

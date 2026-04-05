@@ -1,10 +1,11 @@
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 from qfluentwidgets import MSFluentWindow, NavigationItemPosition, FluentIcon as FIF
-from src.services.auth_service import AuthService
 from src.views.village_view import VillageWidget
 from src.views.household_view import HouseholdWidget
 from src.views.member_view import MemberWidget
+from src.views.view_window import ViewWindow
+from src.services.auth_service import AuthService
 
 class MainView(MSFluentWindow):
     logout = pyqtSignal()
@@ -56,6 +57,12 @@ class MainView(MSFluentWindow):
             member_page = MemberWidget(self)
             member_page.setObjectName('member')
             self.addSubInterface(member_page, FIF.PEOPLE, '成员管理')
+        
+        # 查看窗口
+        if AuthService.check_permission(self.user, 'village_manage'):
+            view_page = ViewWindow(self)
+            view_page.setObjectName('view')
+            self.addSubInterface(view_page, FIF.HOME, '查看窗口')
         
         # 退出按钮
         self.navigationInterface.addItem(

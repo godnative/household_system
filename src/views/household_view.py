@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox
 from PyQt5.QtCore import Qt
-from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog
+from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition
 from src.services.household_service import HouseholdService
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Household
+from sqlalchemy.exc import IntegrityError
 
 class HouseholdWidget(QWidget):
     def __init__(self, parent=None):
@@ -116,6 +117,14 @@ class HouseholdWidget(QWidget):
                 try:
                     HouseholdService.create_household(db, village_id=village_id, household_code=household_number)
                     self.load_households()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='添加失败',
+                        content='家庭编号已存在，请使用其他编号',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     
@@ -159,8 +168,16 @@ class HouseholdWidget(QWidget):
             if household_number and village_id:
                 db = SessionLocal()
                 try:
-                    HouseholdService.update_household(db, household.id, household_code=household_number, village_id=village_id)
+                    HouseholdService.update_household(db, household.id, village_id=village_id, household_code=household_number)
                     self.load_households()
+                except IntegrityError:
+                    db.rollback()
+                    InfoBar.error(
+                        title='修改失败',
+                        content='家庭编号已存在，请使用其他编号',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
                 finally:
                     db.close()
     
