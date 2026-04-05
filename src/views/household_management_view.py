@@ -148,6 +148,9 @@ class HouseholdManagementWidget(QWidget):
         """ 加载家庭数据 """
         # 清空表格
         self.household_table.setRowCount(0)
+
+        if village_id is False:
+            village_id = self.village_combo.currentData()
         
         # 加载家庭数据
         db = SessionLocal()
@@ -185,7 +188,7 @@ class HouseholdManagementWidget(QWidget):
         """ 查看家庭详细信息 """
         view = FlyoutView(
             title='家庭详细信息',
-            content=f'家庭编号: {household.household_code}\n村庄: {household.village.name if household.village else ""}\n地址: {household.address if household.address else "无"}\n户主: {household.head_of_household if household.head_of_household else "无"}',
+            content=f'家庭户号: {household.id}\n家庭编号: {household.household_code}\n片号: {household.plot_number}\n村庄: {household.village.name if household.village else ""}\n家庭住址: {household.address if household.address else "无"}\n电话: {household.phone if household.phone else "无"}\n户主: {household.head_of_household if household.head_of_household else "无"}',
             isClosable=True
         )
         
@@ -201,9 +204,19 @@ class HouseholdManagementWidget(QWidget):
         content = QWidget()
         layout = QFormLayout(content)
         
+        # 家庭户号（只读）
+        household_id_edit = QLineEdit()
+        household_id_edit.setText('系统自动生成')
+        household_id_edit.setReadOnly(True)
+        layout.addRow('家庭户号:', household_id_edit)
+        
         # 家庭编号
         household_code_edit = QLineEdit()
         layout.addRow('家庭编号:', household_code_edit)
+        
+        # 片号
+        plot_number_edit = QLineEdit()
+        layout.addRow('片号:', plot_number_edit)
         
         # 村庄选择
         village_combo = QComboBox()
@@ -218,10 +231,16 @@ class HouseholdManagementWidget(QWidget):
         
         # 家庭地址
         address_edit = QLineEdit()
-        layout.addRow('家庭地址:', address_edit)
+        layout.addRow('家庭住址:', address_edit)
         
-        # 户主姓名
+        # 电话
+        phone_edit = QLineEdit()
+        layout.addRow('电话:', phone_edit)
+        
+        # 户主姓名（空，后续从成员中选择）
         head_of_household_edit = QLineEdit()
+        head_of_household_edit.setText('请在成员管理中设置')
+        head_of_household_edit.setReadOnly(True)
         layout.addRow('户主姓名:', head_of_household_edit)
         
         # 替换对话框内容
@@ -230,24 +249,64 @@ class HouseholdManagementWidget(QWidget):
         dialog.vBoxLayout.insertWidget(1, content)
         
         # 调整对话框大小
-        dialog.resize(450, 350)
+        dialog.resize(450, 450)
         
         # 处理对话框结果
         if dialog.exec():
             household_code = household_code_edit.text().strip()
+            plot_number = plot_number_edit.text().strip()
             village_id = village_combo.currentData()
             address = address_edit.text().strip()
-            head_of_household = head_of_household_edit.text().strip()
+            phone = phone_edit.text().strip()
             
-            if household_code and village_id:
+            # 验证输入
+            if not household_code:
+                InfoBar.error(
+                    title='添加失败',
+                    content='家庭编号不能为空',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if not plot_number or not plot_number.isdigit():
+                InfoBar.error(
+                    title='添加失败',
+                    content='片号必须为数字',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if not address:
+                InfoBar.error(
+                    title='添加失败',
+                    content='家庭住址不能为空',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if phone and not phone.isdigit():
+                InfoBar.error(
+                    title='添加失败',
+                    content='电话必须为数字',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if village_id:
                 db = SessionLocal()
                 try:
                     HouseholdService.create_household(
                         db, 
                         village_id=village_id, 
                         household_code=household_code, 
-                        address=address, 
-                        head_of_household=head_of_household
+                        plot_number=int(plot_number),
+                        address=address,
+                        phone=phone,
+                        head_of_household=None
                     )
                     self.load_households(self.village_combo.currentData())
                 except IntegrityError:
@@ -269,9 +328,18 @@ class HouseholdManagementWidget(QWidget):
         content = QWidget()
         layout = QFormLayout(content)
         
+        # 家庭户号（只读）
+        household_id_edit = QLineEdit(str(household.id))
+        household_id_edit.setReadOnly(True)
+        layout.addRow('家庭户号:', household_id_edit)
+        
         # 家庭编号
         household_code_edit = QLineEdit(household.household_code)
         layout.addRow('家庭编号:', household_code_edit)
+        
+        # 片号
+        plot_number_edit = QLineEdit(str(household.plot_number))
+        layout.addRow('片号:', plot_number_edit)
         
         # 村庄选择
         village_combo = QComboBox()
@@ -288,10 +356,15 @@ class HouseholdManagementWidget(QWidget):
         
         # 家庭地址
         address_edit = QLineEdit(household.address if household.address else '')
-        layout.addRow('家庭地址:', address_edit)
+        layout.addRow('家庭住址:', address_edit)
         
-        # 户主姓名
-        head_of_household_edit = QLineEdit(household.head_of_household if household.head_of_household else '')
+        # 电话
+        phone_edit = QLineEdit(household.phone if household.phone else '')
+        layout.addRow('电话:', phone_edit)
+        
+        # 户主姓名（只读，从成员中选择）
+        head_of_household_edit = QLineEdit(household.head_of_household if household.head_of_household else '请在成员管理中设置')
+        head_of_household_edit.setReadOnly(True)
         layout.addRow('户主姓名:', head_of_household_edit)
         
         # 替换对话框内容
@@ -300,14 +373,52 @@ class HouseholdManagementWidget(QWidget):
         dialog.vBoxLayout.insertWidget(1, content)
         
         # 调整对话框大小
-        dialog.resize(450, 350)
+        dialog.resize(450, 450)
         
         # 处理对话框结果
         if dialog.exec():
             household_code = household_code_edit.text().strip()
+            plot_number = plot_number_edit.text().strip()
             village_id = village_combo.currentData()
             address = address_edit.text().strip()
-            head_of_household = head_of_household_edit.text().strip()
+            phone = phone_edit.text().strip()
+            
+            # 验证输入
+            if not household_code:
+                InfoBar.error(
+                    title='修改失败',
+                    content='家庭编号不能为空',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if not plot_number or not plot_number.isdigit():
+                InfoBar.error(
+                    title='修改失败',
+                    content='片号必须为数字',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if not address:
+                InfoBar.error(
+                    title='修改失败',
+                    content='家庭住址不能为空',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
+            
+            if phone and not phone.isdigit():
+                InfoBar.error(
+                    title='修改失败',
+                    content='电话必须为数字',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                return
             
             if household_code and village_id:
                 db = SessionLocal()
@@ -317,8 +428,9 @@ class HouseholdManagementWidget(QWidget):
                         household.id, 
                         village_id=village_id, 
                         household_code=household_code, 
-                        address=address, 
-                        head_of_household=head_of_household
+                        plot_number=int(plot_number),
+                        address=address,
+                        phone=phone
                     )
                     self.load_households(self.village_combo.currentData())
                 except IntegrityError:
@@ -347,9 +459,20 @@ class HouseholdManagementWidget(QWidget):
         """ 清空成员卡片 """
         # 清空布局
         while self.member_layout.count() > 0:
-            widget = self.member_layout.takeAt(0).widget()
+            item = self.member_layout.takeAt(0)
+            # 检查 item 是否有 widget() 方法
+            if hasattr(item, 'widget'):
+                widget = item.widget()
+            else:
+                # FlowLayout 的 takeAt() 直接返回 widget
+                widget = item
             if widget:
                 widget.deleteLater()
+    
+    def refresh_all(self):
+        """ 刷新所有数据 """
+        # 刷新村庄数据
+        self.load_villages()
     
     def load_members(self, household_id=None):
         """ 加载成员数据 """
@@ -498,13 +621,42 @@ class HouseholdManagementWidget(QWidget):
         status_edit = QLineEdit(member.status if member.status else '')
         layout.addRow('状态:', status_edit)
         
+        # 设为户主按钮
+        set_head_btn = PrimaryPushButton('设为户主')
+        layout.addRow(set_head_btn)
+        
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
         dialog.contentLabel.deleteLater()
         dialog.vBoxLayout.insertWidget(1, content)
         
         # 调整对话框大小
-        dialog.resize(450, 450)
+        dialog.resize(450, 500)
+        
+        # 设为户主按钮点击事件
+        def set_as_head():
+            db = SessionLocal()
+            try:
+                # 更新家庭的户主姓名
+                HouseholdService.update_household(
+                    db, 
+                    member.household_id, 
+                    head_of_household=member.name
+                )
+                # 刷新家庭信息和成员列表
+                self.load_households(self.village_combo.currentData())
+                self.load_members(member.household_id)
+                InfoBar.success(
+                    title='操作成功',
+                    content=f'已将 {member.name} 设为户主',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+                dialog.accept()
+            finally:
+                db.close()
+        
+        set_head_btn.clicked.connect(set_as_head)
         
         # 处理对话框结果
         if dialog.exec():

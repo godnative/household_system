@@ -27,19 +27,23 @@ class HouseholdService:
             query = query.filter(
                 Household.household_code.ilike(f'%{keyword}%') |
                 Household.head_of_household.ilike(f'%{keyword}%') |
-                Household.address.ilike(f'%{keyword}%')
+                Household.address.ilike(f'%{keyword}%') |
+                Household.phone.ilike(f'%{keyword}%')
             )
         
         return query.all()
     
     @staticmethod
     def create_household(db: Session, village_id: int, household_code: str, 
-                        address: str = None, head_of_household: str = None) -> Household:
+                        plot_number: int, address: str, phone: str = None, 
+                        head_of_household: str = None) -> Household:
         """创建新家庭"""
         household = Household(
             village_id=village_id,
             household_code=household_code,
+            plot_number=plot_number,
             address=address,
+            phone=phone,
             head_of_household=head_of_household
         )
         db.add(household)

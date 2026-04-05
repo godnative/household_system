@@ -4,11 +4,13 @@
 
 | 字段名 | 数据类型 | 约束 | 描述 |
 |-------|---------|------|------|
-| id | Integer | 主键，自增 | 家庭唯一标识，内部使用，不暴露给用户 |
-| village_id | Integer | 外键，非空 | 所属村庄ID |
+| id | Integer | 主键，自增 | 家庭户号，唯一标识，用户不可编辑 |
+| village_id | Integer | 外键，非空 | 所属村庄ID（保存时按照村庄id保存，显示时按照村庄名称显示） |
 | household_code | String(20) | 非空，索引 | 家庭编号 |
-| address | String(200) | 可选 | 家庭地址 |
-| head_of_household | String(50) | 可选 | 户主姓名 |
+| plot_number | Integer | 非空 | 片号（必须为数字） |
+| address | String(200) | 非空 | 家庭住址 |
+| phone | String(20) | 可选 | 电话（必须为数字） |
+| head_of_household | String(50) | 可选 | 户主姓名（从家庭的成员中选择） |
 | created_at | DateTime | 自动生成 | 创建时间 |
 | updated_at | DateTime | 自动更新 | 更新时间 |
 
@@ -43,14 +45,16 @@
 - **参数**：数据库会话，家庭ID
 - **返回值**：家庭对象或None
 
-#### create_household(db: Session, village_id: int, household_code: str, address: str = None, head_of_household: str = None)
+#### create_household(db: Session, village_id: int, household_code: str, plot_number: int, address: str, phone: str = None, head_of_household: str = None)
 - **功能**：创建新家庭
 - **参数**：
   - 数据库会话
   - 村庄ID
   - 家庭编号
-  - 家庭地址（可选）
-  - 户主姓名（可选）
+  - 片号（必须为数字）
+  - 家庭住址（非空）
+  - 电话（可选，必须为数字）
+  - 户主姓名（可选，从成员中选择）
 - **返回值**：创建的家庭对象
 
 #### update_household(db: Session, household_id: int, **kwargs)
@@ -58,7 +62,7 @@
 - **参数**：
   - 数据库会话
   - 家庭ID
-  - 要更新的字段（village_id, household_code, address, head_of_household）
+  - 要更新的字段（village_id, household_code, plot_number, address, phone, head_of_household）
 - **返回值**：更新后的家庭对象或None
 
 #### delete_household(db: Session, household_id: int)
@@ -109,14 +113,15 @@
 ## 4. 操作说明
 
 ### 4.1 家庭管理
-- **添加家庭**：填写家庭编号、选择所属村庄，可选择填写家庭地址和户主姓名
-- **编辑家庭**：修改家庭信息，包括家庭编号、所属村庄、家庭地址和户主姓名
+- **添加家庭**：填写家庭编号、片号（必须为数字）、家庭住址（非空）、电话（可选，必须为数字），选择所属村庄
+- **编辑家庭**：修改家庭信息，包括家庭编号、片号（必须为数字）、家庭住址（非空）、电话（可选，必须为数字）、所属村庄
 - **删除家庭**：删除家庭及其所有成员
 - **查看家庭**：点击查看按钮，通过浮层显示家庭详细信息
 
 ### 4.2 成员管理
 - **添加成员**：为选中的家庭添加成员，填写成员姓名、身份证号等信息
 - **编辑成员**：点击成员卡片，弹出对话框可查看和编辑成员详细信息
+- **设为户主**：在成员编辑对话框中点击"设为户主"按钮，将当前成员设为对应家庭的户主
 - **删除成员**：在成员编辑对话框中删除成员
 
 ## 5. 注意事项
@@ -127,3 +132,25 @@
 - 在添加或编辑成员时，身份证号必须符合18位身份证号格式
 - 成员卡片显示采用可滚动组件，当成员数量较多时可通过滚动查看
 - 家庭查看功能使用Flyout浮层显示，提供良好的用户体验
+
+## 6. 家庭管理模块函数实现
+
+### 6.1 村庄选择下拉菜单
+- **初始化**：在 `init_ui` 方法中创建 `self.village_combo` 组件
+- **加载数据**：`load_villages()` 方法 - 从数据库获取所有村庄并填充到下拉菜单
+- **选择变化处理**：`on_village_changed()` 方法 - 当选择不同村庄时，加载对应村庄的家庭数据
+
+### 6.2 家庭管理
+- **添加家庭**：`add_household()` 方法 - 打开添加家庭对话框，收集家庭信息并创建新家庭
+- **编辑家庭**：`edit_household(household)` 方法 - 打开编辑家庭对话框，修改家庭信息
+- **删除家庭**：`delete_household(household)` 方法 - 删除指定家庭及其成员
+- **查看家庭**：`view_household(household)` 方法 - 以Flyout浮层显示家庭详细信息
+- **刷新家庭**：`load_households(village_id)` 方法 - 加载指定村庄的家庭数据到表格
+- **家庭选择**：`on_household_clicked(item)` 方法 - 当点击家庭表格时，加载对应家庭的成员数据
+
+### 6.3 成员管理
+- **添加成员**：`add_member()` 方法 - 打开添加成员对话框，为选中家庭添加新成员
+- **编辑成员**：`edit_member(member)` 方法 - 打开编辑成员对话框，修改成员信息
+- **刷新成员**：`refresh_all()` 方法 - 刷新所有数据，包括村庄、家庭和成员
+- **加载成员**：`load_members(household_id)` 方法 - 加载指定家庭的成员数据到卡片容器
+- **清空成员**：`clear_member_cards()` 方法 - 清空成员卡片容器中的所有卡片
