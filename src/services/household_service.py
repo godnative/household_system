@@ -1,11 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.models import Household, Village
 
 class HouseholdService:
     @staticmethod
     def get_all_households(db: Session, village_id: int = None):
         """获取所有家庭，可按村过滤"""
-        query = db.query(Household)
+        query = db.query(Household).options(joinedload(Household.village))
         if village_id:
             query = query.filter(Household.village_id == village_id)
         return query.all()
@@ -13,12 +13,12 @@ class HouseholdService:
     @staticmethod
     def get_household_by_id(db: Session, household_id: int) -> Household:
         """根据ID获取家庭"""
-        return db.query(Household).filter(Household.id == household_id).first()
+        return db.query(Household).options(joinedload(Household.village)).filter(Household.id == household_id).first()
     
     @staticmethod
     def search_households(db: Session, keyword: str = None, village_id: int = None):
         """搜索家庭"""
-        query = db.query(Household)
+        query = db.query(Household).options(joinedload(Household.village))
         
         if village_id:
             query = query.filter(Household.village_id == village_id)

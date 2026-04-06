@@ -1,15 +1,17 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit, QStackedWidget, QGroupBox, QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit, QStackedWidget, QGroupBox, QGridLayout, QFileDialog
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from functools import partial
+import os
 from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView, TabBar, TabCloseButtonDisplayMode
 from src.services.household_service import HouseholdService
 from src.services.member_service import MemberService
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Household, Member
 from src.views.member_excel_renderer import get_member_excel_html
+from src.views.ui_components import MyDialog
 from sqlalchemy.exc import IntegrityError
-
-
 
 class HouseholdManagementWidget(QWidget):
     def __init__(self, parent=None):
@@ -519,11 +521,16 @@ class HouseholdManagementWidget(QWidget):
                 scroll_content = QWidget()
                 scroll_layout = QVBoxLayout(scroll_content)
                 
-                # 创建富文本编辑器显示表格
-                text_edit = QTextEdit()
-                text_edit.setReadOnly(True)
-                text_edit.setHtml(get_member_excel_html(member))
-                scroll_layout.addWidget(text_edit)
+                # 创建Web引擎视图显示表格
+                # web_view = QWebEngineView()
+                # web_view.setHtml(get_member_excel_html(member))
+                # scroll_layout.addWidget(web_view)
+
+                # 使用lineedit显示表格
+                selfTextEdit = QTextEdit()
+                selfTextEdit.setHtml(get_member_excel_html(member))
+                selfTextEdit.setMinimumHeight(500)
+                scroll_layout.addWidget(selfTextEdit)
                 
                 # 添加修改按钮
                 edit_btn = PrimaryPushButton('修改成员信息')
@@ -560,7 +567,7 @@ class HouseholdManagementWidget(QWidget):
         
         household_id = int(self.household_table.item(selected_row, 0).text())
         
-        dialog = Dialog('添加成员', '请输入成员信息', self)
+        dialog = MyDialog('添加成员', '', self)
         
         # 创建内容 widget
         content = QWidget()
@@ -587,8 +594,10 @@ class HouseholdManagementWidget(QWidget):
         basic_layout.addWidget(gender_combo, 1, 1)
         
         # 出生日期
-        birth_date_edit = QDateEdit()
+        birth_date_edit = QDateEdit(None)
         birth_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        birth_date_edit.setDate(birth_date_edit.minimumDate().addDays(-1))
         basic_layout.addWidget(QLabel('出生日期:'), 1, 2)
         basic_layout.addWidget(birth_date_edit, 1, 3)
         
@@ -610,6 +619,8 @@ class HouseholdManagementWidget(QWidget):
         # 何时迁入
         move_in_date_edit = QDateEdit()
         move_in_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        move_in_date_edit.setDate(move_in_date_edit.minimumDate().addDays(-1))
         basic_layout.addWidget(QLabel('何时迁入:'), 4, 0)
         basic_layout.addWidget(move_in_date_edit, 4, 1)
         
@@ -622,6 +633,33 @@ class HouseholdManagementWidget(QWidget):
         church_id_edit = QLineEdit()
         basic_layout.addWidget(QLabel('教籍证件编号:'), 5, 0)
         basic_layout.addWidget(church_id_edit, 5, 1, 1, 3)
+        
+        # 照片上传
+        photo_layout = QHBoxLayout()
+        photo_label = QLabel('暂无图片')
+        photo_label.setFixedSize(100, 100)
+        photo_label.setStyleSheet('border: 1px solid #ddd;')
+        photo_layout.addWidget(photo_label)
+        
+        photo_path = ''
+        photo_button = PushButton('选择照片')
+        photo_layout.addWidget(photo_button)
+        basic_layout.addWidget(QLabel('照片:'), 6, 0)
+        basic_layout.addLayout(photo_layout, 6, 1, 1, 3)
+        
+        def select_photo():
+            nonlocal photo_path
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, '选择照片', '', 'Image files (*.jpg *.jpeg *.png *.bmp)'
+            )
+            if file_path:
+                photo_path = file_path
+                pixmap = QPixmap(file_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+        
+        photo_button.clicked.connect(select_photo)
         
         main_layout.addWidget(basic_group)
         
@@ -642,6 +680,8 @@ class HouseholdManagementWidget(QWidget):
         # 领洗时间
         baptism_date_edit = QDateEdit()
         baptism_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        baptism_date_edit.setDate(baptism_date_edit.minimumDate().addDays(-1))
         baptism_layout.addWidget(QLabel('领洗时间:'), 2, 0)
         baptism_layout.addWidget(baptism_date_edit, 2, 1)
         
@@ -660,6 +700,8 @@ class HouseholdManagementWidget(QWidget):
         # 初领圣体时间
         first_communion_date_edit = QDateEdit()
         first_communion_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        first_communion_date_edit.setDate(first_communion_date_edit.minimumDate().addDays(-1))
         communion_layout.addWidget(QLabel('初领圣体时间:'), 0, 0)
         communion_layout.addWidget(first_communion_date_edit, 0, 1)
         
@@ -676,6 +718,8 @@ class HouseholdManagementWidget(QWidget):
         # 日期
         supplementary_date_edit = QDateEdit()
         supplementary_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        supplementary_date_edit.setDate(supplementary_date_edit.minimumDate().addDays(-1))
         communion_layout.addWidget(QLabel('补礼日期:'), 3, 0)
         communion_layout.addWidget(supplementary_date_edit, 3, 1)
         
@@ -688,6 +732,8 @@ class HouseholdManagementWidget(QWidget):
         # 年月日
         confirmation_date_edit = QDateEdit()
         confirmation_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        confirmation_date_edit.setDate(confirmation_date_edit.minimumDate().addDays(-1))
         confirmation_layout.addWidget(QLabel('年月日:'), 0, 0)
         confirmation_layout.addWidget(confirmation_date_edit, 0, 1)
         
@@ -725,6 +771,8 @@ class HouseholdManagementWidget(QWidget):
         # 年月日
         marriage_date_edit = QDateEdit()
         marriage_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        marriage_date_edit.setDate(marriage_date_edit.minimumDate().addDays(-1))
         marriage_layout.addWidget(QLabel('年月日:'), 0, 0)
         marriage_layout.addWidget(marriage_date_edit, 0, 1)
         
@@ -762,6 +810,8 @@ class HouseholdManagementWidget(QWidget):
         # 年月日
         anointing_date_edit = QDateEdit()
         anointing_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        anointing_date_edit.setDate(anointing_date_edit.minimumDate().addDays(-1))
         anointing_layout.addWidget(QLabel('年月日:'), 0, 0)
         anointing_layout.addWidget(anointing_date_edit, 0, 1)
         
@@ -778,6 +828,8 @@ class HouseholdManagementWidget(QWidget):
         # 死亡日期
         death_date_edit = QDateEdit()
         death_date_edit.setCalendarPopup(True)
+        # 设置为非法日期
+        death_date_edit.setDate(death_date_edit.minimumDate().addDays(-1))
         anointing_layout.addWidget(QLabel('死亡日期:'), 3, 0)
         anointing_layout.addWidget(death_date_edit, 3, 1)
         
@@ -810,14 +862,12 @@ class HouseholdManagementWidget(QWidget):
         layout.addWidget(scroll_area)
         
         # 替换对话框内容
-        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
-        dialog.contentLabel.deleteLater()
-        dialog.vBoxLayout.insertWidget(1, content)
+        #dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        #dialog.contentLabel.deleteLater()
+        dialog.textLayout.addWidget(content)
         
         # 调整对话框大小为父窗口的80%
-        parent_width = self.width()
-        parent_height = self.height()
-        dialog.resize(int(parent_width * 0.8), int(parent_height * 0.8))
+        dialog.resize(600,400)
         
         # 处理对话框结果
         if dialog.exec():
@@ -872,6 +922,25 @@ class HouseholdManagementWidget(QWidget):
             association = association_edit.text().strip()
             note = note_edit.toPlainText().strip()
             
+            # 处理照片
+            photo = None
+            if photo_path:
+                # 确保照片目录存在
+                photo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'member_photos')
+                os.makedirs(photo_dir, exist_ok=True)
+                
+                # 生成唯一的照片文件名
+                import time
+                photo_filename = f'member_{int(time.time())}_{os.path.basename(photo_path)}'
+                photo_path_save = os.path.join(photo_dir, photo_filename)
+                
+                # 复制照片到目标目录
+                import shutil
+                shutil.copy(photo_path, photo_path_save)
+                
+                # 存储相对路径
+                photo = f'member_photos/{photo_filename}'
+            
             if name and gender:
                 db = SessionLocal()
                 try:
@@ -895,6 +964,7 @@ class HouseholdManagementWidget(QWidget):
                         supplementary_priest=supplementary_priest, 
                         supplementary_place=supplementary_place, 
                         supplementary_date=supplementary_date, 
+                        photo=photo,
                         confirmation_date=confirmation_date, 
                         confirmation_priest=confirmation_priest, 
                         confirmation_godparent=confirmation_godparent, 
@@ -927,11 +997,16 @@ class HouseholdManagementWidget(QWidget):
                     scroll_content = QWidget()
                     scroll_layout = QVBoxLayout(scroll_content)
                     
-                    # 创建富文本编辑器显示表格
-                    text_edit = QTextEdit()
-                    text_edit.setReadOnly(True)
-                    text_edit.setHtml(get_member_excel_html(new_member))
-                    scroll_layout.addWidget(text_edit)
+                    # 创建Web引擎视图显示表格
+                    #web_view = QWebEngineView()
+                    #web_view.setHtml(get_member_excel_html(new_member))
+                    #scroll_layout.addWidget(web_view)
+
+                    # 使用lineedit显示表格
+                    selfTextEdit = QTextEdit()
+                    selfTextEdit.setHtml(get_member_excel_html(new_member))
+                    selfTextEdit.setMinimumHeight(500)
+                    scroll_layout.addWidget(selfTextEdit)
                     
                     # 添加修改按钮
                     edit_btn = PrimaryPushButton('修改成员信息')
@@ -964,10 +1039,17 @@ class HouseholdManagementWidget(QWidget):
                     )
                 finally:
                     db.close()
+            else:
+                InfoBar.error(
+                    title='添加失败',
+                    content='请指定姓名或性别',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
     
     def edit_member(self, member):
         """ 编辑成员 """
-        dialog = Dialog('编辑成员', '请修改成员信息', self)
+        dialog = MyDialog('编辑成员', '请修改成员信息', self)
         
         # 创建内容 widget
         content = QWidget()
@@ -1001,6 +1083,9 @@ class HouseholdManagementWidget(QWidget):
         if member.birth_date:
             from PyQt5.QtCore import QDate
             birth_date_edit.setDate(QDate(member.birth_date.year, member.birth_date.month, member.birth_date.day))
+        else:
+            # 设置为非法日期
+            birth_date_edit.setDate(birth_date_edit.minimumDate().addDays(-1))
         basic_layout.addWidget(QLabel('出生日期:'), 1, 2)
         basic_layout.addWidget(birth_date_edit, 1, 3)
         
@@ -1025,6 +1110,9 @@ class HouseholdManagementWidget(QWidget):
         if member.move_in_date:
             from PyQt5.QtCore import QDate
             move_in_date_edit.setDate(QDate(member.move_in_date.year, member.move_in_date.month, member.move_in_date.day))
+        else:
+            # 设置为非法日期
+            move_in_date_edit.setDate(move_in_date_edit.minimumDate().addDays(-1))
         basic_layout.addWidget(QLabel('何时迁入:'), 4, 0)
         basic_layout.addWidget(move_in_date_edit, 4, 1)
         
@@ -1037,6 +1125,45 @@ class HouseholdManagementWidget(QWidget):
         church_id_edit = QLineEdit(member.church_id if member.church_id else '')
         basic_layout.addWidget(QLabel('教籍证件编号:'), 5, 0)
         basic_layout.addWidget(church_id_edit, 5, 1, 1, 3)
+        
+        # 照片上传
+        photo_layout = QHBoxLayout()
+        photo_label = QLabel('暂无图片')
+        photo_label.setFixedSize(100, 100)
+        photo_label.setStyleSheet('border: 1px solid #ddd;')
+        
+        # 显示现有照片
+        if member.photo:
+            # 构建照片完整路径
+            photo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static')
+            photo_full_path = os.path.join(photo_dir, member.photo)
+            if os.path.exists(photo_full_path):
+                pixmap = QPixmap(photo_full_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+        
+        photo_layout.addWidget(photo_label)
+        
+        photo_path = ''
+        photo_button = PushButton('选择照片')
+        photo_layout.addWidget(photo_button)
+        basic_layout.addWidget(QLabel('照片:'), 6, 0)
+        basic_layout.addLayout(photo_layout, 6, 1, 1, 3)
+        
+        def select_photo():
+            nonlocal photo_path
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, '选择照片', '', 'Image files (*.jpg *.jpeg *.png *.bmp)'
+            )
+            if file_path:
+                photo_path = file_path
+                pixmap = QPixmap(file_path)
+                pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)
+                photo_label.setPixmap(pixmap)
+                photo_label.setText('')
+        
+        photo_button.clicked.connect(select_photo)
         
         main_layout.addWidget(basic_group)
         
@@ -1060,6 +1187,9 @@ class HouseholdManagementWidget(QWidget):
         if member.baptism_date:
             from PyQt5.QtCore import QDate
             baptism_date_edit.setDate(QDate(member.baptism_date.year, member.baptism_date.month, member.baptism_date.day))
+        else:
+            # 设置为非法日期
+            baptism_date_edit.setDate(baptism_date_edit.minimumDate().addDays(-1))
         baptism_layout.addWidget(QLabel('领洗时间:'), 2, 0)
         baptism_layout.addWidget(baptism_date_edit, 2, 1)
         
@@ -1081,6 +1211,9 @@ class HouseholdManagementWidget(QWidget):
         if member.first_communion_date:
             from PyQt5.QtCore import QDate
             first_communion_date_edit.setDate(QDate(member.first_communion_date.year, member.first_communion_date.month, member.first_communion_date.day))
+        else:
+            # 设置为非法日期
+            first_communion_date_edit.setDate(first_communion_date_edit.minimumDate().addDays(-1))
         communion_layout.addWidget(QLabel('初领圣体时间:'), 0, 0)
         communion_layout.addWidget(first_communion_date_edit, 0, 1)
         
@@ -1100,6 +1233,9 @@ class HouseholdManagementWidget(QWidget):
         if member.supplementary_date:
             from PyQt5.QtCore import QDate
             supplementary_date_edit.setDate(QDate(member.supplementary_date.year, member.supplementary_date.month, member.supplementary_date.day))
+        else:
+            # 设置为非法日期
+            supplementary_date_edit.setDate(supplementary_date_edit.minimumDate().addDays(-1))
         communion_layout.addWidget(QLabel('补礼日期:'), 3, 0)
         communion_layout.addWidget(supplementary_date_edit, 3, 1)
         
@@ -1115,6 +1251,9 @@ class HouseholdManagementWidget(QWidget):
         if member.confirmation_date:
             from PyQt5.QtCore import QDate
             confirmation_date_edit.setDate(QDate(member.confirmation_date.year, member.confirmation_date.month, member.confirmation_date.day))
+        else:
+            # 设置为非法日期
+            confirmation_date_edit.setDate(confirmation_date_edit.minimumDate().addDays(-1))
         confirmation_layout.addWidget(QLabel('年月日:'), 0, 0)
         confirmation_layout.addWidget(confirmation_date_edit, 0, 1)
         
@@ -1155,6 +1294,9 @@ class HouseholdManagementWidget(QWidget):
         if member.marriage_date:
             from PyQt5.QtCore import QDate
             marriage_date_edit.setDate(QDate(member.marriage_date.year, member.marriage_date.month, member.marriage_date.day))
+        else:
+            # 设置为非法日期
+            marriage_date_edit.setDate(marriage_date_edit.minimumDate().addDays(-1))
         marriage_layout.addWidget(QLabel('年月日:'), 0, 0)
         marriage_layout.addWidget(marriage_date_edit, 0, 1)
         
@@ -1195,6 +1337,9 @@ class HouseholdManagementWidget(QWidget):
         if member.anointing_date:
             from PyQt5.QtCore import QDate
             anointing_date_edit.setDate(QDate(member.anointing_date.year, member.anointing_date.month, member.anointing_date.day))
+        else:
+            # 设置为非法日期
+            anointing_date_edit.setDate(anointing_date_edit.minimumDate().addDays(-1))
         anointing_layout.addWidget(QLabel('年月日:'), 0, 0)
         anointing_layout.addWidget(anointing_date_edit, 0, 1)
         
@@ -1214,6 +1359,9 @@ class HouseholdManagementWidget(QWidget):
         if member.death_date:
             from PyQt5.QtCore import QDate
             death_date_edit.setDate(QDate(member.death_date.year, member.death_date.month, member.death_date.day))
+        else:
+            # 设置为非法日期
+            death_date_edit.setDate(death_date_edit.minimumDate().addDays(-1))
         anointing_layout.addWidget(QLabel('死亡日期:'), 3, 0)
         anointing_layout.addWidget(death_date_edit, 3, 1)
         
@@ -1242,22 +1390,23 @@ class HouseholdManagementWidget(QWidget):
         main_layout.addWidget(other_group)
         
         # 设为户主按钮
-        set_head_btn = PrimaryPushButton('设为户主')
-        main_layout.addWidget(set_head_btn)
+        set_head_btn = PushButton('设为户主')
+        dialog.buttonLayout.addWidget(set_head_btn)
+        #main_layout.addWidget(set_head_btn)
         
         scroll_area.setWidget(scroll_content)
         scroll_area.setWidgetResizable(True)
         layout.addWidget(scroll_area)
         
         # 替换对话框内容
-        dialog.vBoxLayout.removeWidget(dialog.contentLabel)
-        dialog.contentLabel.deleteLater()
-        dialog.vBoxLayout.insertWidget(1, content)
+        #dialog.vBoxLayout.removeWidget(dialog.contentLabel)
+        #dialog.contentLabel.deleteLater()
+        dialog.textLayout.addWidget(content)
         
         # 调整对话框大小为父窗口的80%
         parent_width = self.width()
         parent_height = self.height()
-        dialog.resize(int(parent_width * 0.8), int(parent_height * 0.8))
+        dialog.resize(600,400)
         
         # 设为户主按钮点击事件
         def set_as_head():
@@ -1269,6 +1418,25 @@ class HouseholdManagementWidget(QWidget):
                     member.household_id, 
                     head_of_household=member.name
                 )
+                # 更新成员的relation_to_head为"本人"
+                MemberService.update_member(
+                    db, 
+                    member.id, 
+                    relation_to_head="本人"
+                )
+                # 更新输入框的值，确保后续代码执行时不会覆盖
+                relation_edit.setText("本人")
+                
+                # 更新当前家庭组的其他成员，如果relation_to_head是"本人"的，修改为"无"
+                other_members = MemberService.get_all_members(db, household_id=member.household_id)
+                for other_member in other_members:
+                    if other_member.id != member.id and other_member.relation_to_head == "本人":
+                        MemberService.update_member(
+                            db, 
+                            other_member.id, 
+                            relation_to_head="无"
+                        )
+                
                 # 刷新家庭信息和成员列表
                 self.load_households(self.village_combo.currentData())
                 self.load_members(member.household_id)
@@ -1337,6 +1505,25 @@ class HouseholdManagementWidget(QWidget):
             association = association_edit.text().strip()
             note = note_edit.toPlainText().strip()
             
+            # 处理照片
+            photo = member.photo  # 默认使用原有照片
+            if photo_path:
+                # 确保照片目录存在
+                photo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'member_photos')
+                os.makedirs(photo_dir, exist_ok=True)
+                
+                # 生成唯一的照片文件名
+                import time
+                photo_filename = f'member_{int(time.time())}_{os.path.basename(photo_path)}'
+                photo_path_save = os.path.join(photo_dir, photo_filename)
+                
+                # 复制照片到目标目录
+                import shutil
+                shutil.copy(photo_path, photo_path_save)
+                
+                # 存储相对路径
+                photo = f'member_photos/{photo_filename}'
+            
             if name and gender:
                 db = SessionLocal()
                 try:
@@ -1361,6 +1548,7 @@ class HouseholdManagementWidget(QWidget):
                         supplementary_priest=supplementary_priest, 
                         supplementary_place=supplementary_place, 
                         supplementary_date=supplementary_date, 
+                        photo=photo,
                         confirmation_date=confirmation_date, 
                         confirmation_priest=confirmation_priest, 
                         confirmation_godparent=confirmation_godparent, 

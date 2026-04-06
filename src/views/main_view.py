@@ -12,7 +12,7 @@ class MainView(MSFluentWindow):
         super().__init__(parent)
         self.user = user
         self.setWindowTitle('户籍管理系统')
-        self.resize(1000, 600)
+        self.resize(1200, 600)
         self.init_navigation()
     
     def init_navigation(self):
