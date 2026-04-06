@@ -3,8 +3,10 @@ from .base import SessionLocal
 import bcrypt
 
 def init_database():
-    # 创建表结构
-    create_tables()
+    # 强制删除并重新创建表结构
+    from .base import Base, engine
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     
     # 创建数据库会话
     db = SessionLocal()
