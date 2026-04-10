@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTa
                              QGroupBox, QGridLayout, QComboBox)
 from PyQt5.QtCore import Qt
 from qfluentwidgets import (PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar,
-                           InfoBarPosition, ComboBox, TabBar, StackedWidget, CardWidget,
+                           InfoBarPosition, ComboBox, TabBar, stacked_widget, CardWidget,
                            BodyLabel, StrongBodyLabel, PasswordLineEdit)
 from src.services.auth_service import AuthService
 from src.services.permission_service import PermissionService
@@ -60,7 +60,7 @@ class UserRoleManagementView(QWidget):
         layout.addWidget(self.tab_bar)
 
         # 创建堆叠窗口
-        self.stacked_widget = StackedWidget(self)
+        self.stacked_widget = stacked_widget.StackedWidget(self)
 
         # 用户管理页面
         user_page = self._create_user_management_page()
@@ -323,7 +323,7 @@ class UserRoleManagementView(QWidget):
         try:
             roles = PermissionService.get_all_roles(db)
             for role in roles:
-                role_combo.addItem(role.name, role.id)
+                role_combo.addItem(role.name, userData=role.id)
         finally:
             db.close()
         layout.addRow('角色:', role_combo)
@@ -335,7 +335,7 @@ class UserRoleManagementView(QWidget):
         try:
             villages = VillageService.get_all_villages(db)
             for village in villages:
-                village_combo.addItem(village.name, village.id)
+                village_combo.addItem(village.name, userData=village.id)
         finally:
             db.close()
         layout.addRow('所属堂区（录入员）:', village_combo)
@@ -451,17 +451,17 @@ class UserRoleManagementView(QWidget):
             role_combo = ComboBox()
             roles = PermissionService.get_all_roles(db)
             for role in roles:
-                role_combo.addItem(role.name, role.id)
+                role_combo.addItem(role.name, userData=role.id)
                 if user.role_id == role.id:
                     role_combo.setCurrentIndex(role_combo.count() - 1)
             layout.addRow('角色:', role_combo)
 
             # 所属堂区（录入员）
             village_combo = ComboBox()
-            village_combo.addItem('无', None)
+            village_combo.addItem('无', userData=None)
             villages = VillageService.get_all_villages(db)
             for village in villages:
-                village_combo.addItem(village.name, village.id)
+                village_combo.addItem(village.name, userData=village.id)
                 if user.village_id == village.id:
                     village_combo.setCurrentIndex(village_combo.count() - 1)
             layout.addRow('所属堂区（录入员）:', village_combo)
