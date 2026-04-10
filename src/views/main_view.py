@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 from qfluentwidgets import MSFluentWindow, NavigationItemPosition, FluentIcon as FIF
 from src.views.village_view import VillageWidget
 from src.views.household_management_view import HouseholdManagementWidget
+from src.views.settings_view import SettingsView
 from src.services.auth_service import AuthService
 
 class MainView(MSFluentWindow):
@@ -30,13 +31,10 @@ class MainView(MSFluentWindow):
         
         # 系统管理
         if AuthService.check_permission(self.user, 'user_manage') or AuthService.check_permission(self.user, 'role_manage'):
-            sys_page = QWidget(self)
-            sys_layout = QVBoxLayout(sys_page)
-            sys_label = QLabel('系统管理')
-            sys_label.setAlignment(Qt.AlignCenter)
-            sys_layout.addWidget(sys_label)
-            sys_page.setObjectName('system')
-            self.addSubInterface(sys_page, FIF.SETTING, '系统管理')
+            # 创建系统设置页面
+            settings_page = SettingsView(self)
+            settings_page.setObjectName('settings')
+            self.addSubInterface(settings_page, FIF.SETTING, '系统设置')
         
         # 堂区管理
         if AuthService.check_permission(self.user, 'village_manage'):

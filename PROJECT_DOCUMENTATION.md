@@ -81,6 +81,13 @@
    - 支持系统打印对话框
    - 家庭与成员信息分页打印（家庭第一页，每个成员单独一页）
 
+7. **数据库备份与还原**
+   - 数据库导出功能（打开数据库文件夹）
+   - 数据库还原功能（选择备份文件还原）
+   - 自动备份原数据库（时间戳命名）
+   - SQLite 数据库文件验证
+   - 数据库信息显示（路径、大小、修改时间）
+
 ### 1.3 技术栈
 
 | 技术 | 版本 | 用途 |
@@ -1551,6 +1558,120 @@ def print_household(self, household):
 - ✅ 自动分页，每个成员单独打印
 
 **代码位置**: [src/views/household_management_view.py](src/views/household_management_view.py:491-542)
+
+---
+
+### 6.6 数据库备份与还原
+
+系统提供完整的数据库备份和还原功能，确保数据安全。
+
+#### 6.6.1 功能概述
+
+数据库备份与还原功能位于**系统设置**页面，包括：
+
+1. **导出数据库**：打开数据库文件所在文件夹，用户可手动复制备份
+2. **还原数据库**：从备份文件还原数据库，原数据库自动重命名保存
+3. **数据库信息**：显示当前数据库的路径、大小、最后修改时间
+
+#### 6.6.2 导出数据库
+
+**实现原理**：
+
+```python
+def open_database_folder():
+    """打开数据库文件所在文件夹"""
+    db_dir = os.path.dirname(DB_PATH)
+    
+    # 根据操作系统打开文件夹
+    system = platform.system()
+    if system == 'Windows':
+        os.startfile(db_dir)
+    elif system == 'Darwin':  # macOS
+        subprocess.run(['open', db_dir])
+    else:  # Linux
+        subprocess.run(['xdg-open', db_dir])
+```
+
+**使用流程**：
+1. 点击"导出数据库"按钮
+2. 自动打开数据库文件夹（`data/` 目录）
+3. 用户手动复制 `household.db` 文件到安全位置
+
+**优势**：
+- ✅ 跨平台支持（Windows、macOS、Linux）
+- ✅ 操作简单，用户可自由选择备份位置
+- ✅ 不依赖应用程序，直接访问原始文件
+
+#### 6.6.3 还原数据库
+
+**实现原理**：
+
+```python
+def import_database(import_path: str):
+    """从备份文件还原数据库"""
+    # 1. 验证文件有效性
+    if not _is_valid_sqlite_db(import_path):
+        return False, "不是有效的SQLite数据库"
+    
+    # 2. 关闭所有数据库连接
+    engine.dispose()
+    
+    # 3. 备份原数据库（重命名）
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_filename = f"household_{timestamp}.db"
+    os.rename(DB_PATH, backup_path)
+    
+    # 4. 复制新数据库文件
+    shutil.copy2(import_path, DB_PATH)
+```
+
+**使用流程**：
+1. 点击"还原数据库"按钮
+2. 弹出确认对话框，提示操作影响
+3. 选择要还原的 `.db` 文件
+4. 系统验证文件是否为有效的 SQLite 数据库
+5. 原数据库自动重命名为 `household_YYYYMMDD_HHMMSS.db`
+6. 新数据库复制到原位置
+7. 提示用户重启应用以生效
+
+**安全特性**：
+- ✅ SQLite 文件头验证（检查 "SQLite format 3" 标识）
+- ✅ 自动备份原数据库，防止数据丢失
+- ✅ 时间戳命名，避免覆盖历史备份
+- ✅ 二次确认对话框，防止误操作
+
+#### 6.6.4 数据库信息显示
+
+**显示内容**：
+
+| 信息项 | 说明 | 示例 |
+|--------|------|------|
+| **数据库路径** | 数据库文件的绝对路径 | `/root/household_system/data/household.db` |
+| **文件大小** | 格式化显示（B/KB/MB/GB） | `2.45 MB` |
+| **最后修改** | 最后修改时间 | `2026-04-10 14:30:25` |
+
+**实现方法**：
+
+```python
+def get_database_info():
+    """获取数据库信息"""
+    info = {
+        'path': DB_PATH,
+        'size': _format_file_size(os.path.getsize(DB_PATH)),
+        'last_modified': datetime.fromtimestamp(
+            os.path.getmtime(DB_PATH)
+        ).strftime('%Y-%m-%d %H:%M:%S')
+    }
+    return info
+```
+
+#### 6.6.5 核心代码位置
+
+| 文件 | 说明 |
+|------|------|
+| `src/services/database_service.py` | 数据库服务，实现备份还原逻辑 |
+| `src/views/settings_view.py` | 系统设置界面，UI交互 |
+| `src/views/main_view.py` | 主窗口，集成系统设置页面 |
 
 ---
 
