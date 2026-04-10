@@ -58,6 +58,7 @@
    - 家庭成员列表展示
    - 户主设置功能
    - 批量成员管理
+   - 家庭及成员信息打印功能
 
 4. **成员信息管理**
    - 成员基本信息（姓名、性别、出生日期、教籍证件号等）
@@ -74,9 +75,11 @@
    - **补礼记录**：神父、地点、日期
 
 6. **数据导出与打印**
-   - 成员信息 HTML 格式导出
-   - 基于 QTextEdit 的富文本显示
-   - 支持打印预览
+   - 家庭信息 HTML 格式导出（a4.html 模板）
+   - 成员信息 HTML 格式导出（a3.html 模板）
+   - 基于 QTextDocument 的打印功能
+   - 支持系统打印对话框
+   - 家庭与成员信息分页打印（家庭第一页，每个成员单独一页）
 
 ### 1.3 技术栈
 
@@ -1116,6 +1119,7 @@ if AuthService.check_permission(self.user, 'household_manage') or \
    - 添加家庭 (`add_household` 方法)
    - 编辑家庭 (`edit_household` 方法)
    - 删除家庭 (`delete_household` 方法)
+   - 打印家庭及成员信息 (`print_household` 方法)
    - 选择家庭后自动加载成员
 
 2. **成员管理（右侧）**
@@ -1308,6 +1312,14 @@ def check_permission(user: User, permission_name: str) -> bool:
 1. 选择家庭
 2. 确认删除
 3. 级联删除所有成员
+
+打印家庭:
+1. 选择家庭
+2. 点击"打印"按钮
+3. 在打印对话框中选择打印机和设置
+4. 系统自动打印：
+   - 第1页：家庭基本信息（使用 a4.html 模板）
+   - 第2页起：每个成员详细信息（使用 a3.html 模板），每人一页
 ```
 
 #### 6.3.2 成员信息管理
@@ -1416,7 +1428,9 @@ else:
 
 #### 6.5.1 HTML 模板渲染
 
-**模板文件**: [doc/a3.html](doc/a3.html)
+**模板文件**: 
+- **家庭信息模板**: [doc/a4.html](doc/a4.html) - 家庭基本信息（户号、片号、地址、户主、电话等）
+- **成员信息模板**: [doc/a3.html](doc/a3.html) - 成员详细信息及圣事记录
 
 **模板特点**:
 - 使用 HTML 4.0 标准（QTextEdit 兼容）
@@ -1476,6 +1490,67 @@ else:
    ```
 
 **代码位置**: [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py), [doc/a3.html](doc/a3.html)
+
+#### 6.5.3 打印功能实现
+
+**功能位置**: [src/views/household_management_view.py](src/views/household_management_view.py) (print_household 方法)
+
+**使用方式**:
+1. 在家庭管理界面选择要打印的家庭
+2. 点击家庭操作列的"打印"按钮
+3. 在系统打印对话框中选择打印机和设置
+4. 点击"确定"开始打印
+
+**打印内容**:
+- **第1页**: 家庭基本信息（户号、片号、堂区、地址、电话、户主）
+- **第2页起**: 每个成员单独一页，包含完整的圣事记录
+
+**技术实现**:
+
+```python
+def print_household(self, household):
+    # 1. 创建打印机对象（高分辨率，A4纸张）
+    printer = QPrinter(QPrinter.HighResolution)
+    printer.setPageSize(QPrinter.A4)
+    
+    # 2. 打开打印对话框
+    dialog = QPrintDialog(printer, self)
+    if dialog.exec_() == QPrintDialog.Accepted:
+        # 3. 创建 QTextDocument 用于渲染HTML
+        document = QTextDocument()
+        
+        # 4. 打印家庭信息（第一页）
+        household_html = get_household_excel_html(household, village)
+        document.setHtml(household_html)
+        document.print_(printer)
+        
+        # 5. 打印成员信息（每人一页）
+        for member in members:
+            printer.newPage()  # 换页
+            member_html = get_member_excel_html(member)
+            document.setHtml(member_html)
+            document.print_(printer)
+```
+
+**核心组件**:
+
+| 组件 | 作用 | 说明 |
+|------|------|------|
+| **QPrinter** | 打印机设备 | 设置纸张大小、分辨率、打印模式 |
+| **QPrintDialog** | 打印对话框 | 让用户选择打印机、设置份数、页面范围等 |
+| **QTextDocument** | 文档对象 | 负责HTML渲染和内容布局 |
+| `document.setHtml()` | 加载HTML | 将HTML字符串加载到文档对象 |
+| `document.print_()` | 执行打印 | 将文档内容发送到打印机 |
+| `printer.newPage()` | 换页 | 在打印内容之间插入分页符 |
+
+**优势**:
+- ✅ 直接使用 QTextDocument，无需创建 widget
+- ✅ 内存占用小，性能高
+- ✅ 代码简洁，易于维护
+- ✅ 支持系统原生打印对话框
+- ✅ 自动分页，每个成员单独打印
+
+**代码位置**: [src/views/household_management_view.py](src/views/household_management_view.py:491-542)
 
 ---
 
@@ -3075,6 +3150,7 @@ html = html.replace('性别占位', member.gender, 1)
 | 堂区管理 | [src/views/village_view.py](src/views/village_view.py) | [src/services/village_service.py](src/services/village_service.py) | [src/models/household.py](src/models/household.py) (Village) |
 | 家庭管理 | [src/views/household_management_view.py](src/views/household_management_view.py) | [src/services/household_service.py](src/services/household_service.py) | [src/models/household.py](src/models/household.py) (Household) |
 | 成员管理 | [src/views/household_management_view.py](src/views/household_management_view.py) | [src/services/member_service.py](src/services/member_service.py) | [src/models/household.py](src/models/household.py) (Member) |
+| 家庭打印 | [src/views/household_management_view.py](src/views/household_management_view.py:491-542) | [src/views/household_excel_renderer.py](src/views/household_excel_renderer.py), [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py) | - |
 | 成员详情 | [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py) | - | - |
 | 权限管理 | [src/views/main_view.py](src/views/main_view.py) | [src/services/auth_service.py](src/services/auth_service.py) | [src/models/auth.py](src/models/auth.py) |
 

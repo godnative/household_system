@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit, QStackedWidget, QGroupBox, QGridLayout, QFileDialog
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QTextDocument
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from functools import partial
 import os
 from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView, TabBar, TabCloseButtonDisplayMode
@@ -9,6 +10,7 @@ from src.services.member_service import MemberService
 from src.services.village_service import VillageService
 from src.models import SessionLocal, Household, Member
 from src.views.member_excel_renderer import get_member_excel_html
+from src.views.household_excel_renderer import get_household_excel_html
 from src.views.ui_components import MyDialog
 from sqlalchemy.exc import IntegrityError
 
@@ -232,12 +234,15 @@ class HouseholdManagementWidget(QWidget):
                 edit_btn.clicked.connect(lambda _, h=household: self.edit_household(h))
                 delete_btn = PushButton('删除')
                 delete_btn.clicked.connect(lambda _, h=household: self.delete_household(h))
+                print_btn = PushButton('打印')
+                print_btn.clicked.connect(lambda _, h=household: self.print_household(h))
 
                 btn_widget = QWidget()
                 btn_widget.setLayout(btn_layout)
                 btn_layout.addWidget(view_btn)
                 btn_layout.addWidget(edit_btn)
                 btn_layout.addWidget(delete_btn)
+                btn_layout.addWidget(print_btn)
 
                 self.household_table.setCellWidget(i, 2, btn_widget)
             
@@ -486,7 +491,58 @@ class HouseholdManagementWidget(QWidget):
                 self.add_member_btn.setEnabled(False)
         finally:
             db.close()
-    
+
+    def print_household(self, household):
+        """ 打印家庭信息和所有成员信息 """
+        db = SessionLocal()
+        try:
+            # 获取堂区信息
+            village = household.village
+
+            # 获取该家庭的所有成员
+            members = MemberService.get_all_members(db, household_id=household.id)
+
+            # 创建打印机对象
+            printer = QPrinter(QPrinter.HighResolution)
+            printer.setPageSize(QPrinter.A4)
+
+            # 打开打印对话框
+            dialog = QPrintDialog(printer, self)
+            if dialog.exec_() == QPrintDialog.Accepted:
+                # 创建 QTextDocument 用于渲染和打印HTML
+                document = QTextDocument()
+
+                # 第一页：打印家庭信息
+                household_html = get_household_excel_html(household, village)
+                document.setHtml(household_html)
+                document.print_(printer)
+
+                # 打印所有成员信息，每个成员单独一页
+                for member in members:
+                    # 新建一页
+                    printer.newPage()
+
+                    # 渲染并打印成员信息
+                    member_html = get_member_excel_html(member)
+                    document.setHtml(member_html)
+                    document.print_(printer)
+
+                InfoBar.success(
+                    title='打印成功',
+                    content=f'已发送打印任务：家庭 {household.id} 及 {len(members)} 位成员',
+                    parent=self,
+                    position=InfoBarPosition.TOP
+                )
+        except Exception as e:
+            InfoBar.error(
+                title='打印失败',
+                content=f'打印时发生错误: {str(e)}',
+                parent=self,
+                position=InfoBarPosition.TOP
+            )
+        finally:
+            db.close()
+
     def clear_member_cards(self):
         """ 清空成员标签 """
         # 清空标签栏
