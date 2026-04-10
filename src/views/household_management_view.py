@@ -531,39 +531,30 @@ class HouseholdManagementWidget(QWidget):
             db.close()
 
     def print_household(self, household):
-        """ 打印家庭信息和所有成员信息 """
+        """ 打印家庭信息和所有成员信息（合并为一次打印） """
         db = SessionLocal()
         try:
-            # 获取堂区信息
             village = household.village
-
-            # 获取该家庭的所有成员
             members = MemberService.get_all_members(db, household_id=household.id)
 
-            # 创建打印机对象
             printer = QPrinter(QPrinter.HighResolution)
             printer.setPageSize(QPrinter.A4)
 
-            # 打开打印对话框
             dialog = QPrintDialog(printer, self)
             if dialog.exec_() == QPrintDialog.Accepted:
-                # 创建 QTextDocument 用于渲染和打印HTML
                 document = QTextDocument()
 
-                # 第一页：打印家庭信息
-                household_html = get_household_excel_html(household, village)
-                document.setHtml(household_html)
+                household_html = get_household_excel_html(household, village, for_print=True)
+
+                page_break = '<br/><br/><div style="page-break-after: always;">&nbsp;</div><br/><br/>'
+
+                all_html = household_html
+                for i, member in enumerate(members):
+                    member_html = get_member_excel_html(member, for_print=True)
+                    all_html += page_break + member_html
+
+                document.setHtml(all_html)
                 document.print_(printer)
-
-                # 打印所有成员信息，每个成员单独一页
-                for member in members:
-                    # 新建一页
-                    printer.newPage()
-
-                    # 渲染并打印成员信息
-                    member_html = get_member_excel_html(member)
-                    document.setHtml(member_html)
-                    document.print_(printer)
 
                 InfoBar.success(
                     title='打印成功',

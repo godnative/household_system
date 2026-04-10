@@ -2,7 +2,7 @@
 
 > 一个基于 PyQt5 开发的天主教堂家庭户籍管理系统，用于管理堂区、家庭、成员信息及圣事记录。
 
----
+***
 
 ## 📑 文档导航
 
@@ -11,7 +11,7 @@
 - 💻 **开发新功能？请看：** [开发指南](#7-开发指南-development-guide)
 - ❓ **遇到问题？请看：** [常见问题](#11-常见问题-faq) 和 [技术要点](#9-技术要点与解决方案-technical-solutions)
 
----
+***
 
 ## 目录
 
@@ -29,7 +29,7 @@
 12. [附录](#12-附录-appendix)
 13. [速查表](#13-速查表-quick-reference)
 
----
+***
 
 ## 1. 项目概述 (Project Overview)
 
@@ -51,25 +51,21 @@
    - 动态权限配置（为角色分配不同权限组合）
    - 密码加密存储（bcrypt）
    - 用户自助修改密码功能
-
 2. **堂区管理**
    - 堂区信息的增删改查
    - 堂区照片上传管理
    - 堂区编码唯一性验证
-
 3. **家庭户籍管理**
    - 家庭基本信息管理（地址、片号、电话等）
    - 家庭成员列表展示
    - 户主设置功能
    - 批量成员管理
    - 家庭及成员信息打印功能
-
 4. **成员信息管理**
    - 成员基本信息（姓名、性别、出生日期、教籍证件号等）
    - 成员照片上传（自动缩放至标准尺寸）
    - 与户主关系管理
    - 职业、文化程度等详细信息
-
 5. **圣事记录管理**
    - **圣洗记录**：施行人、代父、日期、备注
    - **坚振记录**：施行人、代父、圣名、年龄、地点
@@ -77,34 +73,31 @@
    - **病人傅油记录**：施行人、地点、死亡信息
    - **初领圣体记录**：日期记录
    - **补礼记录**：神父、地点、日期
-
 6. **数据导出与打印**
    - 家庭信息 HTML 格式导出（a4.html 模板）
    - 成员信息 HTML 格式导出（a3.html 模板）
    - 基于 QTextDocument 的打印功能
    - 支持系统打印对话框
    - 家庭与成员信息分页打印（家庭第一页，每个成员单独一页）
-
 7. **数据库备份与还原**
    - 数据库导出功能（打开数据库文件夹）
    - 数据库还原功能（选择备份文件还原）
    - 自动备份原数据库（时间戳命名）
    - SQLite 数据库文件验证
    - 数据库信息显示（路径、大小、修改时间）
-
 8. **角色权限管理系统**
    - **三种角色体系**：
      - 超级管理员：拥有所有权限，可管理整个系统
      - 录入员：可管理指定堂区的家庭和成员数据（完整 CRUD 权限）
      - 观察员：只能查看指定堂区的数据（只读权限）
    - **七种权限类型**：
-     - 用户管理权限（user_manage）
-     - 角色管理权限（role_manage）
-     - 堂区管理权限（village_manage）
-     - 家庭管理权限（household_manage）
-     - 家庭查看权限（household_view）
-     - 成员管理权限（member_manage）
-     - 成员查看权限（member_view）
+     - 用户管理权限（user\_manage）
+     - 角色管理权限（role\_manage）
+     - 堂区管理权限（village\_manage）
+     - 家庭管理权限（household\_manage）
+     - 家庭查看权限（household\_view）
+     - 成员管理权限（member\_manage）
+     - 成员查看权限（member\_view）
    - **用户管理功能**：
      - 创建、编辑、删除用户
      - 为用户分配角色
@@ -126,17 +119,17 @@
 
 ### 1.3 技术栈
 
-| 技术 | 版本 | 用途 |
-|------|------|------|
-| **Python** | 3.8+ | 核心编程语言 |
-| **PyQt5** | 5.15.10 | GUI 框架 |
-| **PyQt-Fluent-Widgets** | latest | 现代化 UI 组件库 |
-| **SQLAlchemy** | 1.4.52 | ORM 数据库操作 |
-| **SQLite** | 3.x | 嵌入式数据库 |
-| **bcrypt** | 4.0.1 | 密码加密 |
-| **Pillow** | 10.2.0 | 图片处理 |
-| **pydantic** | 2.6.1 | 数据验证 |
-| **python-dotenv** | 1.0.0 | 环境变量管理 |
+| 技术                      | 版本      | 用途         |
+| ----------------------- | ------- | ---------- |
+| **Python**              | 3.8+    | 核心编程语言     |
+| **PyQt5**               | 5.15.10 | GUI 框架     |
+| **PyQt-Fluent-Widgets** | latest  | 现代化 UI 组件库 |
+| **SQLAlchemy**          | 1.4.52  | ORM 数据库操作  |
+| **SQLite**              | 3.x     | 嵌入式数据库     |
+| **bcrypt**              | 4.0.1   | 密码加密       |
+| **Pillow**              | 10.2.0  | 图片处理       |
+| **pydantic**            | 2.6.1   | 数据验证       |
+| **python-dotenv**       | 1.0.0   | 环境变量管理     |
 
 ### 1.4 适用场景
 
@@ -155,7 +148,7 @@
 - **跨平台**：支持 Windows、Linux、macOS
 - **轻量级**：使用 SQLite 数据库，无需额外配置
 
----
+***
 
 ## 2. 快速开始 (Quick Start)
 
@@ -197,6 +190,7 @@ pip install -r requirements.txt
 ```
 
 **requirements.txt 包含的依赖：**
+
 ```
 PyQt5==5.15.10
 SQLAlchemy==1.4.52
@@ -226,8 +220,9 @@ python -m src.models.init_db
 ```
 
 **初始化脚本会自动创建：**
+
 - ✅ 所有数据表结构
-- ✅ 默认权限（user_manage, role_manage, village_manage, household_manage, member_manage）
+- ✅ 默认权限（user\_manage, role\_manage, village\_manage, household\_manage, member\_manage）
 - ✅ 默认角色（超级管理员、堂区管理员、操作员）
 - ✅ 默认超级管理员账号：
   - 用户名: `admin`
@@ -235,6 +230,7 @@ python -m src.models.init_db
 - ✅ 默认堂区（编码：001）
 
 **预期输出：**
+
 ```
 数据库初始化成功！
 ```
@@ -248,6 +244,7 @@ python -m src.app
 ```
 
 使用默认账号登录：
+
 - 用户名: `admin`
 - 密码: `admin123`
 
@@ -273,25 +270,21 @@ venv\Scripts\python.exe -m src.app --debug
 
 1. **登录系统**
    - 使用默认账号 `admin/admin123` 登录
-
 2. **创建堂区**（可选）
    - 进入"堂区管理"模块
    - 点击"添加村"按钮
    - 填写堂区信息
-
 3. **添加家庭**
    - 进入"家庭管理"模块
    - 选择堂区
    - 点击"添加家庭"按钮
    - 输入家庭编号、片号、地址等信息
-
 4. **添加成员**
    - 在家庭列表中选择一个家庭
    - 切换到"成员管理"标签页
    - 点击"添加成员"按钮
    - 填写成员信息（基本信息、圣事记录等）
    - 可上传成员照片（会自动缩放至 120x160 像素）
-
 5. **查看成员详情**
    - 选择成员后点击"查看详情"按钮
    - 系统会以 HTML 表格形式展示成员的完整信息
@@ -319,7 +312,7 @@ household_system/
 └── PROJECT_DOCUMENTATION.md  # 本文档
 ```
 
----
+***
 
 ## 3. 项目架构 (Architecture)
 
@@ -496,33 +489,29 @@ app.py (应用入口)
    - Model: models/ 目录
    - View: views/ 目录
    - Controller: 部分逻辑在 views 中，controllers/ 目录预留
-
 2. **Service 层模式**
    - 将业务逻辑从 View 和 Model 中分离
    - 提高代码复用性和可测试性
-
 3. **单例模式**
    - `SessionLocal` 数据库会话工厂
    - `Base` 声明式基类
-
 4. **工厂模式**
    - `get_db()` 函数生成数据库会话
-
 5. **策略模式**
    - 基于角色的权限检查 (`check_permission`)
 
 ### 3.6 技术选型理由
 
-| 技术 | 选型理由 |
-|------|---------|
-| **PyQt5** | 成熟的跨平台 GUI 框架，性能优秀，组件丰富 |
-| **SQLAlchemy** | 强大的 ORM 框架，简化数据库操作，支持多种数据库 |
-| **SQLite** | 嵌入式数据库，无需单独安装，适合单机应用 |
-| **bcrypt** | 业界标准的密码哈希算法，安全性高 |
+| 技术                 | 选型理由                                    |
+| ------------------ | --------------------------------------- |
+| **PyQt5**          | 成熟的跨平台 GUI 框架，性能优秀，组件丰富                 |
+| **SQLAlchemy**     | 强大的 ORM 框架，简化数据库操作，支持多种数据库              |
+| **SQLite**         | 嵌入式数据库，无需单独安装，适合单机应用                    |
+| **bcrypt**         | 业界标准的密码哈希算法，安全性高                        |
 | **Fluent-Widgets** | 现代化 UI 组件，符合 Microsoft Fluent Design 规范 |
-| **Pillow** | Python 图像处理标准库，功能全面 |
+| **Pillow**         | Python 图像处理标准库，功能全面                     |
 
----
+***
 
 ## 4. 数据库设计 (Database Design)
 
@@ -625,112 +614,118 @@ app.py (应用入口)
 
 **permissions (权限表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 权限 ID |
-| name | VARCHAR(50) | UNIQUE, NOT NULL | 权限名称（如 user_manage） |
-| description | TEXT | | 权限描述 |
+| 字段名         | 类型          | 约束               | 说明                   |
+| ----------- | ----------- | ---------------- | -------------------- |
+| id          | INTEGER     | PRIMARY KEY      | 权限 ID                |
+| name        | VARCHAR(50) | UNIQUE, NOT NULL | 权限名称（如 user\_manage） |
+| description | TEXT        | <br />           | 权限描述                 |
 
 **默认权限：**
+
 - `user_manage` - 用户管理权限
 - `role_manage` - 角色管理权限
 - `village_manage` - 堂区管理权限
 - `household_manage` - 家庭管理权限
 - `member_manage` - 成员管理权限
 
----
+***
 
 **roles (角色表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 角色 ID |
-| name | VARCHAR(50) | UNIQUE, NOT NULL | 角色名称 |
-| description | TEXT | | 角色描述 |
+| 字段名         | 类型          | 约束               | 说明    |
+| ----------- | ----------- | ---------------- | ----- |
+| id          | INTEGER     | PRIMARY KEY      | 角色 ID |
+| name        | VARCHAR(50) | UNIQUE, NOT NULL | 角色名称  |
+| description | TEXT        | <br />           | 角色描述  |
 
 **默认角色：**
+
 1. **超级管理员** - 拥有所有权限
-2. **堂区管理员** - 拥有 household_manage 和 member_manage 权限
-3. **操作员** - 仅拥有 member_manage 权限
+2. **堂区管理员** - 拥有 household\_manage 和 member\_manage 权限
+3. **操作员** - 仅拥有 member\_manage 权限
 
----
+***
 
-**role_permissions (角色权限关联表)**
+**role\_permissions (角色权限关联表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| role_id | INTEGER | PRIMARY KEY, FOREIGN KEY | 角色 ID |
-| permission_id | INTEGER | PRIMARY KEY, FOREIGN KEY | 权限 ID |
+| 字段名            | 类型      | 约束                       | 说明    |
+| -------------- | ------- | ------------------------ | ----- |
+| role\_id       | INTEGER | PRIMARY KEY, FOREIGN KEY | 角色 ID |
+| permission\_id | INTEGER | PRIMARY KEY, FOREIGN KEY | 权限 ID |
 
 多对多关系，一个角色可以有多个权限，一个权限可以属于多个角色。
 
----
+***
 
 **users (用户表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 用户 ID |
-| username | VARCHAR(50) | UNIQUE, NOT NULL | 用户名 |
-| password_hash | VARCHAR(128) | NOT NULL | 密码哈希值（bcrypt） |
-| role_id | INTEGER | FOREIGN KEY | 所属角色 ID |
-| village_id | INTEGER | FOREIGN KEY, NULLABLE | 管理的堂区 ID（可选） |
-| created_at | DATETIME | DEFAULT now() | 创建时间 |
-| updated_at | DATETIME | DEFAULT now() | 更新时间 |
+| 字段名            | 类型           | 约束                    | 说明            |
+| -------------- | ------------ | --------------------- | ------------- |
+| id             | INTEGER      | PRIMARY KEY           | 用户 ID         |
+| username       | VARCHAR(50)  | UNIQUE, NOT NULL      | 用户名           |
+| password\_hash | VARCHAR(128) | NOT NULL              | 密码哈希值（bcrypt） |
+| role\_id       | INTEGER      | FOREIGN KEY           | 所属角色 ID       |
+| village\_id    | INTEGER      | FOREIGN KEY, NULLABLE | 管理的堂区 ID（可选）  |
+| created\_at    | DATETIME     | DEFAULT now()         | 创建时间          |
+| updated\_at    | DATETIME     | DEFAULT now()         | 更新时间          |
 
 **关联关系：**
+
 - 一个用户属于一个角色（多对一）
 - 一个用户可以管理一个堂区（多对一，可选）
 
----
+***
 
 #### 4.2.2 堂区表
 
 **villages (堂区表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 堂区 ID |
-| name | VARCHAR(100) | NOT NULL | 堂区名称 |
-| code | VARCHAR(20) | UNIQUE, NOT NULL | 堂区编码（唯一） |
-| establishment_date | DATE | NOT NULL | 建堂日期 |
-| village_priest | VARCHAR(50) | NOT NULL | 本堂神父 |
-| address | VARCHAR(200) | NOT NULL | 详细地址 |
-| description | TEXT | | 堂区描述 |
-| photo | VARCHAR(255) | | 堂区照片路径 |
-| created_at | DATETIME | DEFAULT now() | 创建时间 |
-| updated_at | DATETIME | DEFAULT now() | 更新时间 |
+| 字段名                 | 类型           | 约束               | 说明       |
+| ------------------- | ------------ | ---------------- | -------- |
+| id                  | INTEGER      | PRIMARY KEY      | 堂区 ID    |
+| name                | VARCHAR(100) | NOT NULL         | 堂区名称     |
+| code                | VARCHAR(20)  | UNIQUE, NOT NULL | 堂区编码（唯一） |
+| establishment\_date | DATE         | NOT NULL         | 建堂日期     |
+| village\_priest     | VARCHAR(50)  | NOT NULL         | 本堂神父     |
+| address             | VARCHAR(200) | NOT NULL         | 详细地址     |
+| description         | TEXT         | <br />           | 堂区描述     |
+| photo               | VARCHAR(255) | <br />           | 堂区照片路径   |
+| created\_at         | DATETIME     | DEFAULT now()    | 创建时间     |
+| updated\_at         | DATETIME     | DEFAULT now()    | 更新时间     |
 
 **关联关系：**
+
 - 一个堂区可以有多个家庭（一对多）
 - 一个堂区可以有多个管理用户（一对多）
 
----
+***
 
 #### 4.2.3 家庭表
 
 **households (家庭表)**
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 家庭 ID |
-| village_id | INTEGER | FOREIGN KEY, NOT NULL | 所属堂区 ID |
-| household_code | VARCHAR(20) | NOT NULL | 家庭编号 |
-| plot_number | INTEGER | NOT NULL | 片号 |
-| address | VARCHAR(200) | NOT NULL | 详细地址 |
-| phone | VARCHAR(20) | | 联系电话 |
-| head_of_household | VARCHAR(50) | | 户主姓名 |
-| created_at | DATETIME | DEFAULT now() | 创建时间 |
-| updated_at | DATETIME | DEFAULT now() | 更新时间 |
+| 字段名                 | 类型           | 约束                    | 说明      |
+| ------------------- | ------------ | --------------------- | ------- |
+| id                  | INTEGER      | PRIMARY KEY           | 家庭 ID   |
+| village\_id         | INTEGER      | FOREIGN KEY, NOT NULL | 所属堂区 ID |
+| household\_code     | VARCHAR(20)  | NOT NULL              | 家庭编号    |
+| plot\_number        | INTEGER      | NOT NULL              | 片号      |
+| address             | VARCHAR(200) | NOT NULL              | 详细地址    |
+| phone               | VARCHAR(20)  | <br />                | 联系电话    |
+| head\_of\_household | VARCHAR(50)  | <br />                | 户主姓名    |
+| created\_at         | DATETIME     | DEFAULT now()         | 创建时间    |
+| updated\_at         | DATETIME     | DEFAULT now()         | 更新时间    |
 
 **关联关系：**
+
 - 一个家庭属于一个堂区（多对一）
 - 一个家庭可以有多个成员（一对多）
 
 **索引：**
+
 - `household_code` 字段建立索引，提高查询效率
 
----
+***
 
 #### 4.2.4 成员表
 
@@ -740,86 +735,87 @@ app.py (应用入口)
 
 ##### 基本信息字段
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY | 成员 ID |
-| household_id | INTEGER | FOREIGN KEY, NOT NULL | 所属家庭 ID |
-| name | VARCHAR(50) | NOT NULL | 姓名 |
-| gender | VARCHAR(10) | NOT NULL | 性别（男/女） |
-| birth_date | DATE | | 出生日期 |
-| baptismal_name | VARCHAR(50) | | 圣名 |
-| relation_to_head | VARCHAR(20) | | 与户主关系 |
-| education | VARCHAR(50) | | 文化程度 |
-| move_in_date | DATE | | 迁入日期 |
-| occupation | VARCHAR(100) | | 从事职业 |
-| church_id | VARCHAR(50) | | 教籍证件编号 |
-| photo | VARCHAR(255) | | 照片路径 |
+| 字段名                | 类型           | 约束                    | 说明      |
+| ------------------ | ------------ | --------------------- | ------- |
+| id                 | INTEGER      | PRIMARY KEY           | 成员 ID   |
+| household\_id      | INTEGER      | FOREIGN KEY, NOT NULL | 所属家庭 ID |
+| name               | VARCHAR(50)  | NOT NULL              | 姓名      |
+| gender             | VARCHAR(10)  | NOT NULL              | 性别（男/女） |
+| birth\_date        | DATE         | <br />                | 出生日期    |
+| baptismal\_name    | VARCHAR(50)  | <br />                | 圣名      |
+| relation\_to\_head | VARCHAR(20)  | <br />                | 与户主关系   |
+| education          | VARCHAR(50)  | <br />                | 文化程度    |
+| move\_in\_date     | DATE         | <br />                | 迁入日期    |
+| occupation         | VARCHAR(100) | <br />                | 从事职业    |
+| church\_id         | VARCHAR(50)  | <br />                | 教籍证件编号  |
+| photo              | VARCHAR(255) | <br />                | 照片路径    |
 
 ##### 圣洗信息字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| baptism_priest | VARCHAR(50) | 圣洗施行人（神父） |
-| baptism_godparent | VARCHAR(50) | 圣洗代父/代母 |
-| baptism_date | DATE | 领洗日期 |
-| baptism_note | TEXT | 圣洗备注 |
+| 字段名                | 类型          | 说明        |
+| ------------------ | ----------- | --------- |
+| baptism\_priest    | VARCHAR(50) | 圣洗施行人（神父） |
+| baptism\_godparent | VARCHAR(50) | 圣洗代父/代母   |
+| baptism\_date      | DATE        | 领洗日期      |
+| baptism\_note      | TEXT        | 圣洗备注      |
 
 ##### 初领圣体信息
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| first_communion_date | DATE | 初领圣体日期 |
+| 字段名                    | 类型   | 说明     |
+| ---------------------- | ---- | ------ |
+| first\_communion\_date | DATE | 初领圣体日期 |
 
 ##### 补礼信息字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| supplementary_priest | VARCHAR(50) | 补礼神父 |
-| supplementary_place | VARCHAR(100) | 补礼地点 |
-| supplementary_date | DATE | 补礼日期 |
+| 字段名                   | 类型           | 说明   |
+| --------------------- | ------------ | ---- |
+| supplementary\_priest | VARCHAR(50)  | 补礼神父 |
+| supplementary\_place  | VARCHAR(100) | 补礼地点 |
+| supplementary\_date   | DATE         | 补礼日期 |
 
 ##### 坚振信息字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| confirmation_date | DATE | 坚振日期 |
-| confirmation_priest | VARCHAR(50) | 坚振施行人（主教） |
-| confirmation_godparent | VARCHAR(50) | 坚振代父/代母 |
-| confirmation_name | VARCHAR(50) | 坚振圣名 |
-| confirmation_age | INTEGER | 坚振年龄 |
-| confirmation_place | VARCHAR(100) | 坚振地点 |
+| 字段名                     | 类型           | 说明        |
+| ----------------------- | ------------ | --------- |
+| confirmation\_date      | DATE         | 坚振日期      |
+| confirmation\_priest    | VARCHAR(50)  | 坚振施行人（主教） |
+| confirmation\_godparent | VARCHAR(50)  | 坚振代父/代母   |
+| confirmation\_name      | VARCHAR(50)  | 坚振圣名      |
+| confirmation\_age       | INTEGER      | 坚振年龄      |
+| confirmation\_place     | VARCHAR(100) | 坚振地点      |
 
 ##### 婚配信息字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| marriage_date | DATE | 婚配日期 |
-| marriage_priest | VARCHAR(50) | 婚配主礼神父 |
-| marriage_witness | VARCHAR(100) | 婚配证人 |
-| marriage_dispensation_item | VARCHAR(100) | 婚配事项 |
-| marriage_dispensation_priest | VARCHAR(50) | 婚配神父 |
-| marriage_place | VARCHAR(100) | 婚配地点 |
+| 字段名                            | 类型           | 说明     |
+| ------------------------------ | ------------ | ------ |
+| marriage\_date                 | DATE         | 婚配日期   |
+| marriage\_priest               | VARCHAR(50)  | 婚配主礼神父 |
+| marriage\_witness              | VARCHAR(100) | 婚配证人   |
+| marriage\_dispensation\_item   | VARCHAR(100) | 婚配事项   |
+| marriage\_dispensation\_priest | VARCHAR(50)  | 婚配神父   |
+| marriage\_place                | VARCHAR(100) | 婚配地点   |
 
 ##### 病人傅油信息字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| anointing_date | DATE | 病人傅油日期 |
-| anointing_priest | VARCHAR(50) | 病人傅油施行人 |
-| anointing_place | VARCHAR(100) | 病人傅油地点 |
-| death_date | DATE | 死亡日期 |
-| death_age | INTEGER | 死亡年龄 |
+| 字段名               | 类型           | 说明      |
+| ----------------- | ------------ | ------- |
+| anointing\_date   | DATE         | 病人傅油日期  |
+| anointing\_priest | VARCHAR(50)  | 病人傅油施行人 |
+| anointing\_place  | VARCHAR(100) | 病人傅油地点  |
+| death\_date       | DATE         | 死亡日期    |
+| death\_age        | INTEGER      | 死亡年龄    |
 
 ##### 其他字段
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
+| 字段名         | 类型           | 说明   |
+| ----------- | ------------ | ---- |
 | association | VARCHAR(100) | 所属善会 |
-| note | TEXT | 备注 |
-| created_at | DATETIME | 创建时间 |
-| updated_at | DATETIME | 更新时间 |
+| note        | TEXT         | 备注   |
+| created\_at | DATETIME     | 创建时间 |
+| updated\_at | DATETIME     | 更新时间 |
 
 **关联关系：**
+
 - 一个成员属于一个家庭（多对一）
 
 ### 4.3 字段说明
@@ -830,7 +826,8 @@ app.py (应用入口)
 
 在显示时，如果日期等于 `1752-09-14`，会显示为"无"。
 
-**示例代码（member_excel_renderer.py:16）：**
+**示例代码（member\_excel\_renderer.py:16）：**
+
 ```python
 html = html.replace('出生日期占位', 
     f'{str(member.birth_date) if str(member.birth_date) != "1752-09-14" else "无"}', 1)
@@ -859,7 +856,7 @@ def init_database():
     7. 提交事务
 ```
 
----
+***
 
 ## 5. 核心模块详解 (Core Modules)
 
@@ -891,6 +888,7 @@ Base = declarative_base()
 ```
 
 **关键概念**:
+
 - `DB_PATH`: 数据库文件路径，位于项目根目录的 `data/household.db`
 - `engine`: SQLAlchemy 引擎，负责与数据库通信
 - `SessionLocal`: 会话工厂，用于创建数据库会话
@@ -901,11 +899,13 @@ Base = declarative_base()
 **文件位置**: [src/models/auth.py](src/models/auth.py)
 
 **定义的模型**:
+
 - `Role` - 角色模型
 - `Permission` - 权限模型
 - `role_permissions` - 角色权限关联表（多对多）
 
 **关键关系**:
+
 ```python
 # 角色和权限的多对多关系
 role_permissions = Table('role_permissions', Base.metadata,
@@ -925,6 +925,7 @@ class Permission(Base):
 **文件位置**: [src/models/user.py](src/models/user.py)
 
 **User 模型关联关系**:
+
 - 属于一个角色 (多对一)
 - 可以管理一个堂区 (多对一，可选)
 
@@ -939,18 +940,18 @@ class User(Base):
 **文件位置**: [src/models/household.py](src/models/household.py)
 
 **定义的模型**:
+
 1. **Village (堂区)**
    - 关联: households (一对多), users (一对多)
-
 2. **Household (家庭)**
    - 关联: village (多对一), members (一对多)
    - 重要字段: `household_code`, `plot_number`, `head_of_household`
-
 3. **Member (成员)**
    - 关联: household (多对一)
    - 包含: 基本信息 + 5大类圣事记录（圣洗、坚振、婚配、病人傅油、补礼）
 
 **级联删除**:
+
 ```python
 class Village(Base):
     households = relationship('Household', back_populates='village', cascade='all, delete-orphan')
@@ -961,11 +962,12 @@ class Household(Base):
 
 删除堂区会自动删除其下所有家庭，删除家庭会自动删除其下所有成员。
 
-#### 5.1.5 init_db.py - 数据库初始化
+#### 5.1.5 init\_db.py - 数据库初始化
 
-**文件位置**: [src/models/init_db.py](src/models/init_db.py)
+**文件位置**: [src/models/init\_db.py](src/models/init_db.py)
 
 **初始化流程**:
+
 ```python
 def init_database():
     # 1. 删除并重建表结构
@@ -990,29 +992,30 @@ def init_database():
     # 5. 创建默认堂区（编码001）
 ```
 
----
+***
 
 ### 5.2 Services 层（业务逻辑）
 
 Services 层封装业务逻辑，提供数据操作接口，遵循单一职责原则。
 
-#### 5.2.1 auth_service.py - 认证服务
+#### 5.2.1 auth\_service.py - 认证服务
 
-**文件位置**: [src/services/auth_service.py](src/services/auth_service.py)
+**文件位置**: [src/services/auth\_service.py](src/services/auth_service.py)
 
 **主要方法**:
 
-| 方法 | 功能 | 参数 | 返回值 |
-|------|------|------|--------|
-| `verify_password` | 验证密码 | plain_password, hashed_password | bool |
-| `get_password_hash` | 获取密码哈希 | password | str |
-| `authenticate_user` | 验证用户身份 | db, username, password | User 或 None |
-| `check_permission` | 检查用户权限 | user, permission_name | bool |
-| `create_user` | 创建新用户 | db, username, password, role_id, village_id | User |
-| `update_user` | 更新用户信息 | db, user_id, **kwargs | User |
-| `delete_user` | 删除用户 | db, user_id | bool |
+| 方法                  | 功能     | 参数                                            | 返回值         |
+| ------------------- | ------ | --------------------------------------------- | ----------- |
+| `verify_password`   | 验证密码   | plain\_password, hashed\_password             | bool        |
+| `get_password_hash` | 获取密码哈希 | password                                      | str         |
+| `authenticate_user` | 验证用户身份 | db, username, password                        | User 或 None |
+| `check_permission`  | 检查用户权限 | user, permission\_name                        | bool        |
+| `create_user`       | 创建新用户  | db, username, password, role\_id, village\_id | User        |
+| `update_user`       | 更新用户信息 | db, user\_id, \*\*kwargs                      | User        |
+| `delete_user`       | 删除用户   | db, user\_id                                  | bool        |
 
 **使用示例**:
+
 ```python
 from src.services.auth_service import AuthService
 
@@ -1023,9 +1026,10 @@ user = AuthService.authenticate_user(db, 'admin', 'admin123')
 has_permission = AuthService.check_permission(user, 'village_manage')
 ```
 
-#### 5.2.2 village_service.py - 堂区服务
+#### 5.2.2 village\_service.py - 堂区服务
 
 **主要方法**:
+
 - `get_all_villages(db)` - 获取所有堂区
 - `get_village_by_id(db, village_id)` - 根据 ID 获取堂区
 - `search_villages(db, keyword)` - 搜索堂区
@@ -1033,9 +1037,9 @@ has_permission = AuthService.check_permission(user, 'village_manage')
 - `update_village(db, village_id, **kwargs)` - 更新堂区
 - `delete_village(db, village_id)` - 删除堂区
 
-#### 5.2.3 household_service.py - 家庭服务
+#### 5.2.3 household\_service.py - 家庭服务
 
-**文件位置**: [src/services/household_service.py](src/services/household_service.py)
+**文件位置**: [src/services/household\_service.py](src/services/household_service.py)
 
 **主要方法**:
 
@@ -1066,13 +1070,15 @@ class HouseholdService:
 ```
 
 **特点**:
+
 - 使用 `joinedload` 预加载关联数据，减少 N+1 查询问题
 - 支持模糊搜索（ilike）
 - 支持按堂区过滤
 
-#### 5.2.4 member_service.py - 成员服务
+#### 5.2.4 member\_service.py - 成员服务
 
 **主要方法**:
+
 - `get_all_members(db, household_id)` - 获取家庭的所有成员
 - `get_member_by_id(db, member_id)` - 根据 ID 获取成员
 - `search_members(db, keyword, household_id)` - 搜索成员
@@ -1080,37 +1086,41 @@ class HouseholdService:
 - `update_member(db, member_id, **kwargs)` - 更新成员
 - `delete_member(db, member_id)` - 删除成员
 
----
+***
 
 ### 5.3 Views 层（界面视图）
 
 Views 层负责界面展示和用户交互，基于 PyQt5 和 PyQt-Fluent-Widgets。
 
-#### 5.3.1 login_view.py - 登录界面
+#### 5.3.1 login\_view\.py - 登录界面
 
-**文件位置**: [src/views/login_view.py](src/views/login_view.py)
+**文件位置**: [src/views/login\_view.py](src/views/login_view.py)
 
 **功能**:
+
 - 用户登录表单
 - 用户名和密码验证
 - 登录成功后发射信号 `login_success`
 
 **信号**:
+
 ```python
 class LoginView(QWidget):
     login_success = pyqtSignal(object)  # 登录成功信号，传递 User 对象
 ```
 
-#### 5.3.2 main_view.py - 主界面
+#### 5.3.2 main\_view\.py - 主界面
 
-**文件位置**: [src/views/main_view.py](src/views/main_view.py)
+**文件位置**: [src/views/main\_view.py](src/views/main_view.py)
 
 **功能**:
+
 - 使用 `MSFluentWindow` 实现现代化侧边导航栏
 - 根据用户权限动态加载导航项
 - 管理各个子界面的切换
 
 **导航项权限控制**:
+
 ```python
 # 系统管理（需要 user_manage 或 role_manage 权限）
 if AuthService.check_permission(self.user, 'user_manage') or \
@@ -1127,20 +1137,22 @@ if AuthService.check_permission(self.user, 'household_manage') or \
     self.addSubInterface(household_management_page, FIF.HOME, '家庭管理')
 ```
 
-#### 5.3.3 village_view.py - 堂区管理界面
+#### 5.3.3 village\_view\.py - 堂区管理界面
 
 **主要功能**:
+
 - 堂区列表展示（表格）
 - 添加/编辑/删除堂区
 - 堂区照片上传
 - 堂区搜索
 
-#### 5.3.4 household_management_view.py - 家庭管理界面
+#### 5.3.4 household\_management\_view\.py - 家庭管理界面
 
-**文件位置**: [src/views/household_management_view.py](src/views/household_management_view.py)  
+**文件位置**: [src/views/household\_management\_view.py](src/views/household_management_view.py)\
 **代码行数**: 约 1900 行（项目最大的视图文件）
 
 **布局结构**:
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  堂区选择下拉框                                        │
@@ -1164,7 +1176,6 @@ if AuthService.check_permission(self.user, 'household_manage') or \
    - 删除家庭 (`delete_household` 方法)
    - 打印家庭及成员信息 (`print_household` 方法)
    - 选择家庭后自动加载成员
-
 2. **成员管理（右侧）**
    - 使用 `TabBar` 实现多标签页
    - Tab 1 固定为成员表格视图
@@ -1201,7 +1212,8 @@ def resize_and_save_photo(source_path, target_path, target_width=120, target_hei
     scaled_pixmap.save(target_path, quality=90)
 ```
 
-**成员信息表单字段** (add_member/edit_member 对话框):
+**成员信息表单字段** (add\_member/edit\_member 对话框):
+
 - 基本信息: 姓名、性别、出生日期、圣名、与户主关系、文化程度、迁入日期、职业、教籍证件号
 - 照片上传
 - 圣洗信息: 施行人、代父、日期、备注
@@ -1212,11 +1224,12 @@ def resize_and_save_photo(source_path, target_path, target_width=120, target_hei
 - 病人傅油信息: 日期、施行人、地点、死亡日期、年龄
 - 其他: 所属善会、备注
 
-#### 5.3.5 member_excel_renderer.py - 成员信息 HTML 渲染
+#### 5.3.5 member\_excel\_renderer.py - 成员信息 HTML 渲染
 
-**文件位置**: [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py)
+**文件位置**: [src/views/member\_excel\_renderer.py](src/views/member_excel_renderer.py)
 
 **核心函数**:
+
 ```python
 def get_member_excel_html(member):
     """
@@ -1227,6 +1240,7 @@ def get_member_excel_html(member):
 ```
 
 **工作流程**:
+
 1. 读取 HTML 模板 (`doc/a3.html`)
 2. 替换占位符为实际数据
 3. 处理日期字段（`1752-09-14` 显示为"无"）
@@ -1234,6 +1248,7 @@ def get_member_excel_html(member):
 5. 返回完整 HTML
 
 **照片路径处理**:
+
 ```python
 if member.photo:
     # 构建绝对路径
@@ -1248,7 +1263,7 @@ if member.photo:
         f'<img src="{photo_url}" style="width: 120px; height: 160px; object-fit: cover;" />')
 ```
 
----
+***
 
 ## 6. 功能实现详解 (Feature Implementation)
 
@@ -1271,11 +1286,12 @@ if member.photo:
 5. [App] 接收信号，关闭登录窗口，打开主窗口
 ```
 
-**代码位置**: [src/views/login_view.py](src/views/login_view.py), [src/services/auth_service.py](src/services/auth_service.py:17-24)
+**代码位置**: [src/views/login\_view.py](src/views/login_view.py), [src/services/auth\_service.py](src/services/auth_service.py:17-24)
 
 #### 6.1.2 权限检查机制
 
 **实现原理**:
+
 ```python
 def check_permission(user: User, permission_name: str) -> bool:
     """
@@ -1293,6 +1309,7 @@ def check_permission(user: User, permission_name: str) -> bool:
 ```
 
 **使用场景**:
+
 - 主界面动态加载导航项
 - 视图中隐藏/禁用特定功能
 - Service 层拦截非法操作
@@ -1301,17 +1318,18 @@ def check_permission(user: User, permission_name: str) -> bool:
 
 **默认角色及权限**:
 
-| 角色 | 权限 | 用途 |
-|------|------|------|
-| 超级管理员 | user_manage, role_manage, village_manage, household_manage, member_manage | 系统管理员，拥有所有权限 |
-| 堂区管理员 | household_manage, member_manage | 管理指定堂区的家庭和成员 |
-| 操作员 | member_manage | 仅操作成员数据 |
+| 角色    | 权限                                                                             | 用途           |
+| ----- | ------------------------------------------------------------------------------ | ------------ |
+| 超级管理员 | user\_manage, role\_manage, village\_manage, household\_manage, member\_manage | 系统管理员，拥有所有权限 |
+| 堂区管理员 | household\_manage, member\_manage                                              | 管理指定堂区的家庭和成员 |
+| 操作员   | member\_manage                                                                 | 仅操作成员数据      |
 
----
+***
 
 ### 6.2 堂区管理
 
 **操作流程**:
+
 1. 用户点击"添加村"按钮
 2. 弹出对话框，填写堂区信息
 3. 可选上传堂区照片
@@ -1319,26 +1337,29 @@ def check_permission(user: User, permission_name: str) -> bool:
 5. 刷新堂区列表
 
 **关键验证**:
+
 - 堂区编码唯一性
 - 建堂日期格式
 - 必填字段检查
 
-**代码位置**: [src/views/village_view.py](src/views/village_view.py)
+**代码位置**: [src/views/village\_view.py](src/views/village_view.py)
 
----
+***
 
 ### 6.3 家庭户籍管理
 
 #### 6.3.1 家庭信息管理
 
 **家庭字段**:
-- 家庭编号（household_code）：唯一标识
-- 片号（plot_number）：用于分区管理
+
+- 家庭编号（household\_code）：唯一标识
+- 片号（plot\_number）：用于分区管理
 - 地址（address）：详细住址
 - 电话（phone）：联系方式
-- 户主姓名（head_of_household）：从成员中选择
+- 户主姓名（head\_of\_household）：从成员中选择
 
 **操作流程**:
+
 ```
 添加家庭:
 1. 选择堂区
@@ -1368,6 +1389,7 @@ def check_permission(user: User, permission_name: str) -> bool:
 #### 6.3.2 成员信息管理
 
 **成员添加流程**:
+
 ```
 1. 选择家庭
 2. 点击"添加成员"按钮
@@ -1380,7 +1402,7 @@ def check_permission(user: User, permission_name: str) -> bool:
 6. 刷新成员列表
 ```
 
-**代码位置**: [src/views/household_management_view.py](src/views/household_management_view.py:800-1100) (add_member 方法)
+**代码位置**: [src/views/household\_management\_view.py](src/views/household_management_view.py:800-1100) (add\_member 方法)
 
 #### 6.3.3 成员照片处理
 
@@ -1406,18 +1428,20 @@ else:
 ```
 
 **照片处理原理**:
+
 1. 使用 `Qt.KeepAspectRatioByExpanding` 缩放，确保填满目标尺寸
 2. 如果缩放后超出目标尺寸，进行中心裁剪
 3. 保存为 JPG 格式，quality=90
 
 **为什么要自动缩放？**
+
 - 避免大尺寸照片破坏 HTML 表格布局
 - 减少存储空间占用
 - 统一照片规格，美观整洁
 
-**代码位置**: [src/views/household_management_view.py](src/views/household_management_view.py:16-50) (resize_and_save_photo 函数)
+**代码位置**: [src/views/household\_management\_view.py](src/views/household_management_view.py:16-50) (resize\_and\_save\_photo 函数)
 
----
+***
 
 ### 6.4 圣事记录管理
 
@@ -1426,62 +1450,69 @@ else:
 #### 6.4.1 圣洗记录
 
 **字段**:
-- 施行人（baptism_priest）：施洗神父
-- 代父（baptism_godparent）：代父或代母
-- 领洗日期（baptism_date）
-- 备注（baptism_note）
+
+- 施行人（baptism\_priest）：施洗神父
+- 代父（baptism\_godparent）：代父或代母
+- 领洗日期（baptism\_date）
+- 备注（baptism\_note）
 
 #### 6.4.2 坚振记录
 
 **字段**:
-- 坚振日期（confirmation_date）
-- 施行人（confirmation_priest）：通常是主教
-- 代父（confirmation_godparent）
-- 坚振圣名（confirmation_name）
-- 坚振年龄（confirmation_age）
-- 坚振地点（confirmation_place）
+
+- 坚振日期（confirmation\_date）
+- 施行人（confirmation\_priest）：通常是主教
+- 代父（confirmation\_godparent）
+- 坚振圣名（confirmation\_name）
+- 坚振年龄（confirmation\_age）
+- 坚振地点（confirmation\_place）
 
 #### 6.4.3 婚配记录
 
 **字段**:
-- 婚配日期（marriage_date）
-- 主礼神父（marriage_priest）
-- 证人（marriage_witness）
-- 事项（marriage_dispensation_item）
-- 神父（marriage_dispensation_priest）
-- 地点（marriage_place）
+
+- 婚配日期（marriage\_date）
+- 主礼神父（marriage\_priest）
+- 证人（marriage\_witness）
+- 事项（marriage\_dispensation\_item）
+- 神父（marriage\_dispensation\_priest）
+- 地点（marriage\_place）
 
 #### 6.4.4 病人傅油记录
 
 **字段**:
-- 傅油日期（anointing_date）
-- 施行人（anointing_priest）
-- 地点（anointing_place）
-- 死亡日期（death_date）
-- 死亡年龄（death_age）
+
+- 傅油日期（anointing\_date）
+- 施行人（anointing\_priest）
+- 地点（anointing\_place）
+- 死亡日期（death\_date）
+- 死亡年龄（death\_age）
 
 #### 6.4.5 其他圣事
 
-- **初领圣体**: first_communion_date
-- **补礼**: supplementary_priest, supplementary_place, supplementary_date
+- **初领圣体**: first\_communion\_date
+- **补礼**: supplementary\_priest, supplementary\_place, supplementary\_date
 
----
+***
 
 ### 6.5 数据导出与打印
 
 #### 6.5.1 HTML 模板渲染
 
-**模板文件**: 
+**模板文件**:
+
 - **家庭信息模板**: [doc/a4.html](doc/a4.html) - 家庭基本信息（户号、片号、地址、户主、电话等）
 - **成员信息模板**: [doc/a3.html](doc/a3.html) - 成员详细信息及圣事记录
 
 **模板特点**:
+
 - 使用 HTML 4.0 标准（QTextEdit 兼容）
 - 使用 `table-layout: fixed` 固定列宽
 - 所有 `<td>` 标签显式指定 `width` 属性
 - 占位符格式：`姓名占位`, `性别占位` 等
 
 **渲染流程**:
+
 ```
 1. 读取 a3.html 模板
 2. 替换所有占位符为实际数据
@@ -1493,6 +1524,7 @@ else:
 #### 6.5.2 QTextEdit HTML 适配
 
 **QTextEdit HTML 渲染限制**:
+
 - ❌ 不支持 HTML5/CSS3
 - ❌ 不支持 `<col>` 标签
 - ❌ 不支持复杂 CSS 布局
@@ -1506,23 +1538,21 @@ else:
    ```html
    <!-- 错误：QTextEdit 不支持 -->
    <col width="80">
-   
+
    <!-- 正确：使用 table-layout: fixed 和 td width -->
    <style>
    table { table-layout: fixed; width: 600px; }
    </style>
    <td width="80">姓名</td>
    ```
-
 2. **图片显示问题**:
    ```python
    # 错误：相对路径不工作
    <img src="static/member_photos/abc.jpg">
-   
+
    # 正确：使用 file:// 协议的绝对路径
    <img src="file:///C:/path/to/project/static/member_photos/abc.jpg">
    ```
-
 3. **跨平台路径**:
    ```python
    # 使用 pathlib.Path.as_uri() 自动处理 Windows/Unix 差异
@@ -1532,19 +1562,21 @@ else:
    # Linux: file:///home/user/path/to/file.jpg
    ```
 
-**代码位置**: [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py), [doc/a3.html](doc/a3.html)
+**代码位置**: [src/views/member\_excel\_renderer.py](src/views/member_excel_renderer.py), [doc/a3.html](doc/a3.html)
 
 #### 6.5.3 打印功能实现
 
-**功能位置**: [src/views/household_management_view.py](src/views/household_management_view.py) (print_household 方法)
+**功能位置**: [src/views/household\_management\_view.py](src/views/household_management_view.py) (print\_household 方法)
 
 **使用方式**:
+
 1. 在家庭管理界面选择要打印的家庭
 2. 点击家庭操作列的"打印"按钮
 3. 在系统打印对话框中选择打印机和设置
 4. 点击"确定"开始打印
 
 **打印内容**:
+
 - **第1页**: 家庭基本信息（户号、片号、堂区、地址、电话、户主）
 - **第2页起**: 每个成员单独一页，包含完整的圣事记录
 
@@ -1577,25 +1609,26 @@ def print_household(self, household):
 
 **核心组件**:
 
-| 组件 | 作用 | 说明 |
-|------|------|------|
-| **QPrinter** | 打印机设备 | 设置纸张大小、分辨率、打印模式 |
-| **QPrintDialog** | 打印对话框 | 让用户选择打印机、设置份数、页面范围等 |
-| **QTextDocument** | 文档对象 | 负责HTML渲染和内容布局 |
-| `document.setHtml()` | 加载HTML | 将HTML字符串加载到文档对象 |
-| `document.print_()` | 执行打印 | 将文档内容发送到打印机 |
-| `printer.newPage()` | 换页 | 在打印内容之间插入分页符 |
+| 组件                   | 作用     | 说明                  |
+| -------------------- | ------ | ------------------- |
+| **QPrinter**         | 打印机设备  | 设置纸张大小、分辨率、打印模式     |
+| **QPrintDialog**     | 打印对话框  | 让用户选择打印机、设置份数、页面范围等 |
+| **QTextDocument**    | 文档对象   | 负责HTML渲染和内容布局       |
+| `document.setHtml()` | 加载HTML | 将HTML字符串加载到文档对象     |
+| `document.print_()`  | 执行打印   | 将文档内容发送到打印机         |
+| `printer.newPage()`  | 换页     | 在打印内容之间插入分页符        |
 
 **优势**:
+
 - ✅ 直接使用 QTextDocument，无需创建 widget
 - ✅ 内存占用小，性能高
 - ✅ 代码简洁，易于维护
 - ✅ 支持系统原生打印对话框
 - ✅ 自动分页，每个成员单独打印
 
-**代码位置**: [src/views/household_management_view.py](src/views/household_management_view.py:491-542)
+**代码位置**: [src/views/household\_management\_view.py](src/views/household_management_view.py:491-542)
 
----
+***
 
 ### 6.6 数据库备份与还原
 
@@ -1629,11 +1662,13 @@ def open_database_folder():
 ```
 
 **使用流程**：
+
 1. 点击"导出数据库"按钮
 2. 自动打开数据库文件夹（`data/` 目录）
 3. 用户手动复制 `household.db` 文件到安全位置
 
 **优势**：
+
 - ✅ 跨平台支持（Windows、macOS、Linux）
 - ✅ 操作简单，用户可自由选择备份位置
 - ✅ 不依赖应用程序，直接访问原始文件
@@ -1662,6 +1697,7 @@ def import_database(import_path: str):
 ```
 
 **使用流程**：
+
 1. 点击"还原数据库"按钮
 2. 弹出确认对话框，提示操作影响
 3. 选择要还原的 `.db` 文件
@@ -1671,6 +1707,7 @@ def import_database(import_path: str):
 7. 提示用户重启应用以生效
 
 **安全特性**：
+
 - ✅ SQLite 文件头验证（检查 "SQLite format 3" 标识）
 - ✅ 自动备份原数据库，防止数据丢失
 - ✅ 时间戳命名，避免覆盖历史备份
@@ -1680,11 +1717,11 @@ def import_database(import_path: str):
 
 **显示内容**：
 
-| 信息项 | 说明 | 示例 |
-|--------|------|------|
-| **数据库路径** | 数据库文件的绝对路径 | `/root/household_system/data/household.db` |
-| **文件大小** | 格式化显示（B/KB/MB/GB） | `2.45 MB` |
-| **最后修改** | 最后修改时间 | `2026-04-10 14:30:25` |
+| 信息项       | 说明                | 示例                                         |
+| --------- | ----------------- | ------------------------------------------ |
+| **数据库路径** | 数据库文件的绝对路径        | `/root/household_system/data/household.db` |
+| **文件大小**  | 格式化显示（B/KB/MB/GB） | `2.45 MB`                                  |
+| **最后修改**  | 最后修改时间            | `2026-04-10 14:30:25`                      |
 
 **实现方法**：
 
@@ -1703,13 +1740,13 @@ def get_database_info():
 
 #### 6.6.5 核心代码位置
 
-| 文件 | 说明 |
-|------|------|
+| 文件                                 | 说明             |
+| ---------------------------------- | -------------- |
 | `src/services/database_service.py` | 数据库服务，实现备份还原逻辑 |
-| `src/views/settings_view.py` | 系统设置界面，UI交互 |
-| `src/views/main_view.py` | 主窗口，集成系统设置页面 |
+| `src/views/settings_view.py`       | 系统设置界面，UI交互    |
+| `src/views/main_view.py`           | 主窗口，集成系统设置页面   |
 
----
+***
 
 ### 6.7 角色权限管理系统
 
@@ -1718,6 +1755,7 @@ def get_database_info():
 完整的角色权限管理系统（RBAC），支持三种角色、七种权限，以及细粒度的堂区级别数据访问控制。
 
 **主要特性**：
+
 - 超级管理员可以管理所有用户、角色和数据
 - 录入员可以完整管理指定堂区的家庭和成员数据
 - 观察员只能查看指定堂区的数据（只读）
@@ -1726,7 +1764,8 @@ def get_database_info():
 
 #### 6.7.2 数据库模型
 
-**user_village_access 关联表**（多对多关系）：
+**user\_village\_access 关联表**（多对多关系）：
+
 ```python
 # src/models/auth.py
 user_village_access = Table('user_village_access', Base.metadata,
@@ -1736,6 +1775,7 @@ user_village_access = Table('user_village_access', Base.metadata,
 ```
 
 **User 模型扩展**：
+
 ```python
 # src/models/user.py
 class User(Base):
@@ -1746,6 +1786,7 @@ class User(Base):
 ```
 
 **权限常量定义**：
+
 ```python
 # src/constants/permissions.py
 PERM_USER_MANAGE = 'user_manage'          # 用户管理权限
@@ -1764,6 +1805,7 @@ ROLE_OBSERVER = '观察员'
 #### 6.7.3 核心服务方法
 
 **AuthService 权限检查**：
+
 ```python
 # src/services/auth_service.py
 
@@ -1797,6 +1839,7 @@ def check_village_access(user: User, village_id: int) -> bool:
 ```
 
 **PermissionService 堂区分配**：
+
 ```python
 # src/services/permission_service.py
 
@@ -1831,19 +1874,18 @@ def assign_villages_to_user(db: Session, user_id: int, village_ids: list):
      - 添加用户对话框（用户名、密码、角色、堂区配置）
      - 编辑用户对话框（修改角色、堂区、重置密码）
      - 删除用户（确认对话框）
-   
    - **角色管理标签页**：
      - 角色列表表格（角色名、描述、操作）
      - 添加角色对话框（角色名、描述、权限多选）
      - 编辑角色对话框（修改描述、权限配置）
      - 查看角色权限详情
      - 删除角色（检查是否有用户使用）
-
 2. **普通用户视图**（个人信息卡片）：
    - 显示用户名、角色、所属堂区/可访问堂区
    - 修改密码按钮（弹出对话框：旧密码、新密码、确认新密码）
 
 **关键代码示例**：
+
 ```python
 # src/views/user_role_management_view.py
 
@@ -1865,6 +1907,7 @@ class UserRoleManagementView(QWidget):
 #### 6.7.5 权限控制实现
 
 **主导航权限控制**：
+
 ```python
 # src/views/main_view.py
 
@@ -1891,6 +1934,7 @@ def init_navigation(self):
 ```
 
 **家庭管理权限过滤**：
+
 ```python
 # src/views/household_management_view.py
 
@@ -1924,6 +1968,7 @@ def load_households(self, village_id=None):
 #### 6.7.6 数据库初始化
 
 **角色和权限初始化**：
+
 ```python
 # src/models/init_db.py
 
@@ -1964,11 +2009,13 @@ def init_database():
 4. **确认创建** → 新用户可以登录系统
 
 **录入员使用流程**：
+
 1. 登录系统 → 只能看到分配的堂区
 2. 进入"家庭管理" → 可以添加、编辑、删除家庭和成员
 3. 进入"用户角色管理" → 只能查看自己的信息和修改密码
 
 **观察员使用流程**：
+
 1. 登录系统 → 只能看到分配的堂区
 2. 进入"家庭管理" → 编辑/删除按钮被禁用（灰色）
 3. 可以查看所有信息，但无法修改
@@ -1976,11 +2023,13 @@ def init_database():
 #### 6.7.8 测试脚本
 
 **运行权限系统测试**：
+
 ```bash
 python3 test_permissions.py
 ```
 
 测试脚本会：
+
 1. 验证角色和权限是否正确创建
 2. 验证默认管理员用户
 3. 创建测试用户（录入员、观察员）
@@ -1989,20 +2038,20 @@ python3 test_permissions.py
 
 #### 6.7.9 核心代码位置
 
-| 文件 | 说明 |
-|------|------|
-| `src/constants/permissions.py` | 权限和角色常量定义 |
-| `src/models/auth.py` | user_village_access 关联表 |
-| `src/models/user.py` | User 模型扩展 |
-| `src/services/auth_service.py` | 权限检查和访问控制服务 |
-| `src/services/permission_service.py` | 角色权限管理服务 |
-| `src/views/user_role_management_view.py` | 用户角色管理界面（约900行） |
-| `src/views/main_view.py` | 主导航权限控制 |
-| `src/views/household_management_view.py` | 家庭管理权限控制 |
-| `src/models/init_db.py` | 角色权限初始化 |
-| `test_permissions.py` | 权限系统测试脚本 |
+| 文件                                       | 说明                        |
+| ---------------------------------------- | ------------------------- |
+| `src/constants/permissions.py`           | 权限和角色常量定义                 |
+| `src/models/auth.py`                     | user\_village\_access 关联表 |
+| `src/models/user.py`                     | User 模型扩展                 |
+| `src/services/auth_service.py`           | 权限检查和访问控制服务               |
+| `src/services/permission_service.py`     | 角色权限管理服务                  |
+| `src/views/user_role_management_view.py` | 用户角色管理界面（约900行）           |
+| `src/views/main_view.py`                 | 主导航权限控制                   |
+| `src/views/household_management_view.py` | 家庭管理权限控制                  |
+| `src/models/init_db.py`                  | 角色权限初始化                   |
+| `test_permissions.py`                    | 权限系统测试脚本                  |
 
----
+***
 
 ## 7. 开发指南 (Development Guide)
 
@@ -2010,12 +2059,12 @@ python3 test_permissions.py
 
 #### 7.1.1 必需工具
 
-| 工具 | 版本要求 | 说明 |
-|------|---------|------|
-| **Python** | 3.8+ | 核心开发语言 |
-| **IDE** | VS Code / PyCharm | 推荐使用 VS Code + Python 扩展 |
-| **Git** | 最新版本 | 版本控制 |
-| **SQLite Browser** | 最新版本 | 数据库可视化工具（可选） |
+| 工具                 | 版本要求              | 说明                       |
+| ------------------ | ----------------- | ------------------------ |
+| **Python**         | 3.8+              | 核心开发语言                   |
+| **IDE**            | VS Code / PyCharm | 推荐使用 VS Code + Python 扩展 |
+| **Git**            | 最新版本              | 版本控制                     |
+| **SQLite Browser** | 最新版本              | 数据库可视化工具（可选）             |
 
 #### 7.1.2 开发环境配置
 
@@ -2046,12 +2095,14 @@ python -m src.app --debug
 #### 7.1.3 VS Code 配置
 
 **推荐安装的扩展**:
+
 - Python (Microsoft)
 - Pylance
 - SQLite Viewer
 - Git Graph
 
 **launch.json 配置**:
+
 ```json
 {
     "version": "0.2.0",
@@ -2077,7 +2128,7 @@ python -m src.app --debug
 }
 ```
 
----
+***
 
 ### 7.2 添加新功能的步骤
 
@@ -2093,7 +2144,7 @@ python -m src.app --debug
    from sqlalchemy.orm import relationship
    from .base import Base
    import datetime
-   
+
    class Activity(Base):
        __tablename__ = 'activities'
        
@@ -2108,13 +2159,11 @@ python -m src.app --debug
        # 关联关系
        village = relationship('Village', back_populates='activities')
    ```
-
 2. **更新关联模型**
    ```python
    # 在 Village 类中添加
    activities = relationship('Activity', back_populates='village', cascade='all, delete-orphan')
    ```
-
 3. **重新初始化数据库**
    ```bash
    python -m src.models.init_db
@@ -2122,7 +2171,7 @@ python -m src.app --debug
 
 #### 7.2.2 添加新的 Service
 
-**创建文件**: [src/services/activity_service.py](src/services/activity_service.py)
+**创建文件**: [src/services/activity\_service.py](src/services/activity_service.py)
 
 ```python
 from sqlalchemy.orm import Session
@@ -2178,7 +2227,7 @@ class ActivityService:
 
 #### 7.2.3 添加新的视图
 
-**创建文件**: [src/views/activity_view.py](src/views/activity_view.py)
+**创建文件**: [src/views/activity\_view.py](src/views/activity_view.py)
 
 ```python
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QPushButton
@@ -2233,7 +2282,7 @@ class ActivityView(QWidget):
 
 #### 7.2.4 在主界面中注册视图
 
-**编辑**: [src/views/main_view.py](src/views/main_view.py)
+**编辑**: [src/views/main\_view.py](src/views/main_view.py)
 
 ```python
 from src.views.activity_view import ActivityView
@@ -2244,19 +2293,19 @@ activity_page = ActivityView(self)
 self.addSubInterface(activity_page, FIF.CALENDAR, '活动管理')
 ```
 
----
+***
 
 ### 7.3 代码规范
 
 #### 7.3.1 命名规范
 
-| 类型 | 命名方式 | 示例 |
-|------|---------|------|
-| **类名** | PascalCase | `HouseholdService`, `MemberView` |
-| **函数/方法** | snake_case | `get_all_households()`, `create_member()` |
-| **变量** | snake_case | `household_id`, `member_name` |
-| **常量** | UPPER_SNAKE_CASE | `DB_PATH`, `DEFAULT_DATE` |
-| **私有成员** | _前缀 | `_internal_method()`, `_cache` |
+| 类型        | 命名方式               | 示例                                        |
+| --------- | ------------------ | ----------------------------------------- |
+| **类名**    | PascalCase         | `HouseholdService`, `MemberView`          |
+| **函数/方法** | snake\_case        | `get_all_households()`, `create_member()` |
+| **变量**    | snake\_case        | `household_id`, `member_name`             |
+| **常量**    | UPPER\_SNAKE\_CASE | `DB_PATH`, `DEFAULT_DATE`                 |
+| **私有成员**  | \_前缀               | `_internal_method()`, `_cache`            |
 
 #### 7.3.2 文档注释规范
 
@@ -2303,7 +2352,7 @@ from src.models import Household, Member
 from src.services.household_service import HouseholdService
 ```
 
----
+***
 
 ### 7.4 调试技巧
 
@@ -2319,6 +2368,7 @@ python -m src.app --debug
 #### 7.4.2 数据库调试
 
 **查看数据库内容**:
+
 ```bash
 # 使用 SQLite 命令行
 sqlite3 data/household.db
@@ -2334,6 +2384,7 @@ SELECT * FROM members LIMIT 10;
 ```
 
 **使用 Python 查询**:
+
 ```python
 from src.models import SessionLocal, Member
 
@@ -2346,6 +2397,7 @@ for member in members:
 #### 7.4.3 日志记录
 
 **添加日志**:
+
 ```python
 import logging
 
@@ -2394,7 +2446,7 @@ photo_url = photo_abs_path.as_uri()
 html = f'<img src="{photo_url}">'
 ```
 
----
+***
 
 ### 7.5 测试
 
@@ -2467,7 +2519,7 @@ python -m unittest discover test
 python -m unittest discover test -v
 ```
 
----
+***
 
 ### 7.6 版本控制
 
@@ -2514,7 +2566,7 @@ git commit -m "fix: 修复成员照片显示问题"
 git commit -m "docs: 更新 README"
 ```
 
----
+***
 
 ## 8. API 参考 (API Reference)
 
@@ -2522,13 +2574,14 @@ git commit -m "docs: 更新 README"
 
 #### 8.1.1 AuthService
 
-**文件**: [src/services/auth_service.py](src/services/auth_service.py)
+**文件**: [src/services/auth\_service.py](src/services/auth_service.py)
 
 ##### `authenticate_user(db, username, password)`
 
 验证用户身份
 
 **参数**:
+
 - `db` (Session): 数据库会话
 - `username` (str): 用户名
 - `password` (str): 明文密码
@@ -2536,6 +2589,7 @@ git commit -m "docs: 更新 README"
 **返回**: User 对象或 None
 
 **示例**:
+
 ```python
 from src.services.auth_service import AuthService
 from src.models import SessionLocal
@@ -2551,12 +2605,14 @@ if user:
 检查用户权限
 
 **参数**:
+
 - `user` (User): 用户对象
-- `permission_name` (str): 权限名称（如 'village_manage'）
+- `permission_name` (str): 权限名称（如 'village\_manage'）
 
 **返回**: bool
 
 **示例**:
+
 ```python
 has_permission = AuthService.check_permission(user, 'household_manage')
 ```
@@ -2566,6 +2622,7 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 创建新用户
 
 **参数**:
+
 - `db` (Session): 数据库会话
 - `username` (str): 用户名
 - `password` (str): 明文密码
@@ -2574,17 +2631,17 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 
 **返回**: User 对象
 
----
+***
 
 #### 8.1.2 VillageService
 
-**文件**: [src/services/village_service.py](src/services/village_service.py)
+**文件**: [src/services/village\_service.py](src/services/village_service.py)
 
 ##### `get_all_villages(db)`
 
 获取所有堂区
 
-**返回**: List[Village]
+**返回**: List\[Village]
 
 ##### `create_village(db, name, code, establishment_date, village_priest, address, description=None, photo=None)`
 
@@ -2596,22 +2653,23 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 
 搜索堂区（按名称、编码、神父、地址）
 
-**返回**: List[Village]
+**返回**: List\[Village]
 
----
+***
 
 #### 8.1.3 HouseholdService
 
-**文件**: [src/services/household_service.py](src/services/household_service.py)
+**文件**: [src/services/household\_service.py](src/services/household_service.py)
 
 ##### `get_all_households(db, village_id=None)`
 
 获取所有家庭
 
 **参数**:
+
 - `village_id` (int, optional): 按堂区过滤
 
-**返回**: List[Household]
+**返回**: List\[Household]
 
 ##### `create_household(db, village_id, household_code, plot_number, address, phone=None)`
 
@@ -2623,25 +2681,26 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 
 搜索家庭
 
-**返回**: List[Household]
+**返回**: List\[Household]
 
----
+***
 
 #### 8.1.4 MemberService
 
-**文件**: [src/services/member_service.py](src/services/member_service.py)
+**文件**: [src/services/member\_service.py](src/services/member_service.py)
 
 ##### `get_all_members(db, household_id)`
 
 获取家庭的所有成员
 
-**返回**: List[Member]
+**返回**: List\[Member]
 
 ##### `create_member(db, household_id, name, gender, **kwargs)`
 
 创建成员
 
 **关键字参数**:
+
 - `birth_date`: 出生日期
 - `baptismal_name`: 圣名
 - `relation_to_head`: 与户主关系
@@ -2659,7 +2718,7 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 
 **返回**: Member 对象或 None
 
----
+***
 
 ### 8.2 Models API
 
@@ -2668,53 +2727,58 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 **表名**: `villages`
 
 **字段**:
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | Integer | 主键 |
-| name | String(100) | 堂区名称 |
-| code | String(20) | 堂区编码（唯一） |
-| establishment_date | Date | 建堂日期 |
-| village_priest | String(50) | 本堂神父 |
-| address | String(200) | 详细地址 |
-| description | Text | 堂区描述 |
-| photo | String(255) | 照片路径 |
-| created_at | DateTime | 创建时间 |
-| updated_at | DateTime | 更新时间 |
+
+| 字段                  | 类型          | 说明       |
+| ------------------- | ----------- | -------- |
+| id                  | Integer     | 主键       |
+| name                | String(100) | 堂区名称     |
+| code                | String(20)  | 堂区编码（唯一） |
+| establishment\_date | Date        | 建堂日期     |
+| village\_priest     | String(50)  | 本堂神父     |
+| address             | String(200) | 详细地址     |
+| description         | Text        | 堂区描述     |
+| photo               | String(255) | 照片路径     |
+| created\_at         | DateTime    | 创建时间     |
+| updated\_at         | DateTime    | 更新时间     |
 
 **关联**:
+
 - `households`: 一对多关系，该堂区的所有家庭
 - `users`: 一对多关系，管理该堂区的用户
 
----
+***
 
 #### 8.2.2 Household (家庭)
 
 **表名**: `households`
 
 **字段**:
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | Integer | 主键 |
-| village_id | Integer | 所属堂区 ID（外键） |
-| household_code | String(20) | 家庭编号 |
-| plot_number | Integer | 片号 |
-| address | String(200) | 详细地址 |
-| phone | String(20) | 联系电话 |
-| head_of_household | String(50) | 户主姓名 |
-| created_at | DateTime | 创建时间 |
-| updated_at | DateTime | 更新时间 |
+
+| 字段                  | 类型          | 说明          |
+| ------------------- | ----------- | ----------- |
+| id                  | Integer     | 主键          |
+| village\_id         | Integer     | 所属堂区 ID（外键） |
+| household\_code     | String(20)  | 家庭编号        |
+| plot\_number        | Integer     | 片号          |
+| address             | String(200) | 详细地址        |
+| phone               | String(20)  | 联系电话        |
+| head\_of\_household | String(50)  | 户主姓名        |
+| created\_at         | DateTime    | 创建时间        |
+| updated\_at         | DateTime    | 更新时间        |
 
 **关联**:
+
 - `village`: 多对一关系，所属堂区
 - `members`: 一对多关系，该家庭的所有成员
 
----
+***
 
 #### 8.2.3 Member (成员)
 
 **表名**: `members`
 
 **主要字段**:
+
 - 基本信息: `id`, `household_id`, `name`, `gender`, `birth_date`, `baptismal_name`, `relation_to_head`, `education`, `occupation`, `church_id`, `photo`
 - 圣洗: `baptism_priest`, `baptism_godparent`, `baptism_date`, `baptism_note`
 - 坚振: `confirmation_date`, `confirmation_priest`, `confirmation_godparent`, `confirmation_name`, `confirmation_age`, `confirmation_place`
@@ -2723,25 +2787,28 @@ has_permission = AuthService.check_permission(user, 'household_manage')
 - 其他: `first_communion_date`, `supplementary_priest`, `supplementary_place`, `supplementary_date`, `association`, `note`
 
 **关联**:
+
 - `household`: 多对一关系，所属家庭
 
----
+***
 
 ### 8.3 工具函数
 
-#### 8.3.1 resize_and_save_photo()
+#### 8.3.1 resize\_and\_save\_photo()
 
-**文件**: [src/views/household_management_view.py](src/views/household_management_view.py:16-50)
+**文件**: [src/views/household\_management\_view.py](src/views/household_management_view.py:16-50)
 
 **功能**: 调整照片尺寸并保存
 
 **签名**:
+
 ```python
 def resize_and_save_photo(source_path: str, target_path: str, 
                          target_width: int = 120, target_height: int = 160) -> bool
 ```
 
 **参数**:
+
 - `source_path`: 源照片路径
 - `target_path`: 目标保存路径
 - `target_width`: 目标宽度（默认 120px）
@@ -2750,29 +2817,33 @@ def resize_and_save_photo(source_path: str, target_path: str,
 **返回**: bool（成功/失败）
 
 **实现原理**:
+
 1. 使用 `Qt.KeepAspectRatioByExpanding` 缩放
 2. 如果缩放后超出目标尺寸，进行中心裁剪
 3. 保存为 JPG 格式，quality=90
 
----
+***
 
-#### 8.3.2 get_member_excel_html()
+#### 8.3.2 get\_member\_excel\_html()
 
-**文件**: [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py)
+**文件**: [src/views/member\_excel\_renderer.py](src/views/member_excel_renderer.py)
 
 **功能**: 生成成员信息的 HTML 表格
 
 **签名**:
+
 ```python
 def get_member_excel_html(member: Member) -> str
 ```
 
 **参数**:
+
 - `member`: Member 对象
 
 **返回**: str（HTML 字符串）
 
 **使用示例**:
+
 ```python
 from src.views.member_excel_renderer import get_member_excel_html
 
@@ -2780,7 +2851,7 @@ html = get_member_excel_html(member)
 text_edit.setHtml(html)
 ```
 
----
+***
 
 ## 9. 技术要点与解决方案 (Technical Solutions)
 
@@ -2866,7 +2937,7 @@ with get_db() as db:
     household = HouseholdService.create_household(db, ...)
 ```
 
----
+***
 
 ### 9.2 PyQt5 常见问题
 
@@ -2875,6 +2946,7 @@ with get_db() as db:
 **问题**: QTextEdit 不支持 HTML5/CSS3
 
 **限制**:
+
 - ❌ 不支持 `<col>` 标签
 - ❌ 不支持 `flex` 布局
 - ❌ 不支持 `grid` 布局
@@ -2971,7 +3043,7 @@ def resize_and_save_photo(source_path, target_path, target_width=120, target_hei
     return True
 ```
 
----
+***
 
 ### 9.3 日期字段处理
 
@@ -2982,12 +3054,14 @@ def resize_and_save_photo(source_path, target_path, target_width=120, target_hei
 **解决方案**: 使用最小日期 `1752-09-14` 作为"无日期"标志
 
 **数据库中**:
+
 ```python
 # models/household.py
 birth_date = Column(Date, default=date(1752, 9, 14))
 ```
 
 **显示时转换**:
+
 ```python
 # views/member_excel_renderer.py
 def format_date(date_value):
@@ -2998,19 +3072,21 @@ def format_date(date_value):
 html = html.replace('出生日期占位', format_date(member.birth_date))
 ```
 
----
+***
 
 ### 9.4 性能优化
 
 #### 9.4.1 数据库查询优化
 
 **使用索引**:
+
 ```python
 # 为常用查询字段添加索引
 household_code = Column(String(20), nullable=False, index=True)
 ```
 
 **批量操作**:
+
 ```python
 # 不好：逐个插入
 for data in data_list:
@@ -3028,6 +3104,7 @@ db.commit()  # 一次提交
 #### 9.4.2 界面性能优化
 
 **延迟加载**:
+
 ```python
 # 只在需要时加载成员详情，而不是一次性加载所有成员的所有数据
 def on_member_selected(self):
@@ -3037,13 +3114,14 @@ def on_member_selected(self):
         self.load_member_details(member)
 ```
 
----
+***
 
 ### 9.5 安全性
 
 #### 9.5.1 密码安全
 
 **使用 bcrypt 加密**:
+
 ```python
 import bcrypt
 
@@ -3059,6 +3137,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 #### 9.5.2 SQL 注入防护
 
 **使用 ORM 参数化查询**（SQLAlchemy 自动处理）:
+
 ```python
 # 安全：参数化查询
 households = db.query(Household).filter(
@@ -3069,7 +3148,7 @@ households = db.query(Household).filter(
 # query = f"SELECT * FROM households WHERE household_code = '{user_input}'"
 ```
 
----
+***
 
 ## 10. 部署指南 (Deployment)
 
@@ -3078,11 +3157,13 @@ households = db.query(Household).filter(
 #### 10.1.1 使用 PyInstaller 打包
 
 **安装 PyInstaller**:
+
 ```bash
 pip install pyinstaller
 ```
 
 **创建打包脚本** (`build.spec`):
+
 ```python
 # -*- mode: python ; coding: utf-8 -*-
 
@@ -3150,22 +3231,25 @@ coll = COLLECT(
 ```
 
 **执行打包**:
+
 ```bash
 pyinstaller build.spec
 ```
 
 **输出**:
+
 - 可执行文件位于 `dist/家庭户籍管理系统/`
 - 包含所有依赖和资源文件
 
 #### 10.1.2 创建安装程序
 
 **使用 Inno Setup**:
+
 1. 下载并安装 [Inno Setup](https://jrsoftware.org/isinfo.php)
 2. 创建安装脚本 `installer.iss`
 3. 编译生成安装程序
 
----
+***
 
 ### 10.2 Linux 部署
 
@@ -3216,13 +3300,14 @@ chmod +x start.sh
 ./start.sh
 ```
 
----
+***
 
 ### 10.3 macOS 部署
 
 #### 10.3.1 打包为 .app
 
 **使用 py2app**:
+
 ```bash
 pip install py2app
 
@@ -3233,7 +3318,7 @@ py2applet --make-setup src/app.py
 python setup.py py2app
 ```
 
----
+***
 
 ### 10.4 数据库备份
 
@@ -3247,6 +3332,7 @@ cp data/household.db data/household_backup_$(date +%Y%m%d).db
 #### 10.4.2 自动备份脚本
 
 **Windows** (`backup.bat`):
+
 ```batch
 @echo off
 set TIMESTAMP=%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%
@@ -3254,6 +3340,7 @@ xcopy data\household.db backup\household_%TIMESTAMP%.db /Y
 ```
 
 **Linux** (`backup.sh`):
+
 ```bash
 #!/bin/bash
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -3272,7 +3359,7 @@ cp backup/household_20260410.db data/household.db
 # 重启应用
 ```
 
----
+***
 
 ## 11. 常见问题 (FAQ)
 
@@ -3281,24 +3368,27 @@ cp backup/household_20260410.db data/household.db
 **Q: 运行时提示 "No module named 'PyQt5'"**
 
 A: 安装 PyQt5
+
 ```bash
 pip install PyQt5==5.15.10
 ```
 
----
+***
 
 **Q: 运行时提示 "No module named 'qfluentwidgets'"**
 
 A: 安装 PyQt-Fluent-Widgets
+
 ```bash
 pip install PyQt-Fluent-Widgets[full]
 ```
 
----
+***
 
 **Q: 初始化数据库失败**
 
 A: 检查以下几点：
+
 1. `data` 目录是否存在
 2. 是否有写入权限
 3. 数据库文件是否被占用
@@ -3309,22 +3399,24 @@ rm data/household.db
 python -m src.models.init_db
 ```
 
----
+***
 
 **Q: 启动后立即崩溃**
 
 A: 以调试模式运行查看错误信息
+
 ```bash
 python -m src.app
 ```
 
----
+***
 
 ### 11.2 功能使用问题
 
 **Q: 忘记管理员密码怎么办？**
 
 A: 重新初始化数据库（会清空所有数据）或手动修改密码哈希：
+
 ```python
 from src.models import SessionLocal, User
 from src.services.auth_service import AuthService
@@ -3335,69 +3427,76 @@ user.password_hash = AuthService.get_password_hash('new_password')
 db.commit()
 ```
 
----
+***
 
 **Q: 上传的照片不显示**
 
 A: 检查以下几点：
+
 1. `static/member_photos/` 目录是否存在
 2. 照片路径是否正确保存到数据库
 3. 照片文件是否损坏
 
----
+***
 
 **Q: 设置户主后，其他成员的关系没有自动更新**
 
 A: 这是预期行为。设置户主时，只更新：
+
 1. 家庭表的 `head_of_household` 字段
 2. 被设为户主的成员的 `relation_to_head` 为"户主"
 
 其他成员的关系需要手动编辑更新。
 
----
+***
 
 **Q: 成员信息显示为"无"的日期如何修改？**
 
 A: 编辑成员信息，选择正确的日期即可。"无"表示 `1752-09-14`（默认日期）。
 
----
+***
 
 ### 11.3 性能问题
 
 **Q: 家庭列表加载缓慢**
 
 A: 原因可能是：
+
 1. 堂区下家庭过多
 2. 没有使用预加载（joinedload）
 
 解决方案：
+
 - 使用搜索功能缩小范围
 - 确保代码使用了 `joinedload`
 
----
+***
 
 **Q: 数据库文件过大**
 
 A: SQLite 数据库文件可能包含已删除数据的空间，可以使用 VACUUM 命令压缩：
+
 ```bash
 sqlite3 data/household.db "VACUUM;"
 ```
 
----
+***
 
 ### 11.4 数据问题
 
 **Q: 删除家庭时提示"有成员存在"**
 
 A: 这不应该发生（有级联删除）。如果出现：
+
 1. 检查数据库完整性
 2. 先手动删除所有成员，再删除家庭
 
----
+***
 
 **Q: 如何批量导入数据？**
 
 A: 目前不支持批量导入。可以编写脚本：
+
 ```python
 from src.models import SessionLocal
 from src.services.household_service import HouseholdService
@@ -3417,17 +3516,19 @@ for _, row in df.iterrows():
 db.close()
 ```
 
----
+***
 
 ## 12. 附录 (Appendix)
 
 ### 12.1 数据字典
 
 #### 12.1.1 性别选项
+
 - 男
 - 女
 
 #### 12.1.2 与户主关系
+
 - 户主
 - 配偶
 - 子女
@@ -3438,6 +3539,7 @@ db.close()
 - 其他
 
 #### 12.1.3 文化程度
+
 - 文盲
 - 小学
 - 初中
@@ -3448,11 +3550,12 @@ db.close()
 - 硕士
 - 博士
 
----
+***
 
 ### 12.2 数据库 Schema
 
 **完整数据库结构**:
+
 ```sql
 -- 权限表
 CREATE TABLE permissions (
@@ -3532,79 +3635,85 @@ CREATE TABLE members (
 );
 ```
 
----
+***
 
 ### 12.3 HTML 模板说明
 
 **模板文件**: [doc/a3.html](doc/a3.html)
 
 **占位符列表**:
+
 - 基本信息: `姓名占位`, `性别占位`, `出生日期占位`, `教籍证件号占位`, `与户主关系占位`
 - 照片: `图片占位`
 - 圣事信息: `圣洗施行人占位`, `领洗日期占位`, `坚振日期占位`, `婚配日期占位` 等
 
 **使用方式**:
+
 ```python
 html = html.replace('姓名占位', member.name, 1)
 html = html.replace('性别占位', member.gender, 1)
 ```
 
----
+***
 
 ### 12.4 系统要求
 
 #### 最低配置
+
 - CPU: 双核 1.5GHz
 - 内存: 2GB
 - 硬盘: 100MB 可用空间
 - 操作系统: Windows 7 / Ubuntu 18.04 / macOS 10.14
 
 #### 推荐配置
+
 - CPU: 四核 2.0GHz
 - 内存: 4GB
 - 硬盘: 500MB 可用空间
 - 操作系统: Windows 10 / Ubuntu 20.04 / macOS 11
 
----
+***
 
 ### 12.5 许可证
 
 本项目采用 MIT 许可证。
 
----
+***
 
 ### 12.6 贡献指南
 
 欢迎提交 Issue 和 Pull Request！
 
 **提交 Issue**:
+
 1. 描述问题或建议
 2. 提供复现步骤（如果是bug）
 3. 附上错误信息或截图
 
 **提交 Pull Request**:
+
 1. Fork 项目
 2. 创建功能分支
 3. 提交代码并编写测试
 4. 发起 Pull Request
 
----
+***
 
 ## 13. 速查表 (Quick Reference)
 
 ### 13.1 功能代码映射表
 
-| 功能 | 视图文件 | 服务文件 | 模型 |
-|------|---------|---------|------|
-| 用户登录 | [src/views/login_view.py](src/views/login_view.py) | [src/services/auth_service.py](src/services/auth_service.py) | [src/models/user.py](src/models/user.py) |
-| 堂区管理 | [src/views/village_view.py](src/views/village_view.py) | [src/services/village_service.py](src/services/village_service.py) | [src/models/household.py](src/models/household.py) (Village) |
-| 家庭管理 | [src/views/household_management_view.py](src/views/household_management_view.py) | [src/services/household_service.py](src/services/household_service.py) | [src/models/household.py](src/models/household.py) (Household) |
-| 成员管理 | [src/views/household_management_view.py](src/views/household_management_view.py) | [src/services/member_service.py](src/services/member_service.py) | [src/models/household.py](src/models/household.py) (Member) |
-| 家庭打印 | [src/views/household_management_view.py](src/views/household_management_view.py:491-542) | [src/views/household_excel_renderer.py](src/views/household_excel_renderer.py), [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py) | - |
-| 成员详情 | [src/views/member_excel_renderer.py](src/views/member_excel_renderer.py) | - | - |
-| 权限管理 | [src/views/main_view.py](src/views/main_view.py) | [src/services/auth_service.py](src/services/auth_service.py) | [src/models/auth.py](src/models/auth.py) |
+| 功能   | 视图文件                                                                                       | 服务文件                                                                                                                                                         | 模型                                                             |
+| ---- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| 用户登录 | [src/views/login\_view.py](src/views/login_view.py)                                        | [src/services/auth\_service.py](src/services/auth_service.py)                                                                                                | [src/models/user.py](src/models/user.py)                       |
+| 堂区管理 | [src/views/village\_view.py](src/views/village_view.py)                                    | [src/services/village\_service.py](src/services/village_service.py)                                                                                          | [src/models/household.py](src/models/household.py) (Village)   |
+| 家庭管理 | [src/views/household\_management\_view.py](src/views/household_management_view.py)         | [src/services/household\_service.py](src/services/household_service.py)                                                                                      | [src/models/household.py](src/models/household.py) (Household) |
+| 成员管理 | [src/views/household\_management\_view.py](src/views/household_management_view.py)         | [src/services/member\_service.py](src/services/member_service.py)                                                                                            | [src/models/household.py](src/models/household.py) (Member)    |
+| 家庭打印 | [src/views/household\_management\_view.py](src/views/household_management_view.py:491-542) | [src/views/household\_excel\_renderer.py](src/views/household_excel_renderer.py), [src/views/member\_excel\_renderer.py](src/views/member_excel_renderer.py) | -                                                              |
+| 成员详情 | [src/views/member\_excel\_renderer.py](src/views/member_excel_renderer.py)                 | -                                                                                                                                                            | -                                                              |
+| 权限管理 | [src/views/main\_view.py](src/views/main_view.py)                                          | [src/services/auth\_service.py](src/services/auth_service.py)                                                                                                | [src/models/auth.py](src/models/auth.py)                       |
 
----
+***
 
 ### 13.2 常用命令
 
@@ -3631,41 +3740,41 @@ cp data/household.db backup/household_$(date +%Y%m%d).db
 sqlite3 data/household.db "VACUUM;"
 ```
 
----
+***
 
 ### 13.3 关键文件路径
 
-| 文件 | 路径 | 说明 |
-|------|------|------|
-| 应用入口 | [src/app.py](src/app.py) | 程序主入口 |
-| 数据库配置 | [src/models/base.py](src/models/base.py) | 数据库连接配置 |
-| 数据库初始化 | [src/models/init_db.py](src/models/init_db.py) | 数据库初始化脚本 |
-| 数据库文件 | data/household.db | SQLite 数据库 |
-| HTML 模板 | [doc/a3.html](doc/a3.html) | 成员信息模板 |
-| 照片目录 | static/member_photos/ | 成员照片存储 |
-| 依赖列表 | requirements.txt | Python 依赖包 |
-| 项目文档 | [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) | 本文档 |
+| 文件      | 路径                                                    | 说明         |
+| ------- | ----------------------------------------------------- | ---------- |
+| 应用入口    | [src/app.py](src/app.py)                              | 程序主入口      |
+| 数据库配置   | [src/models/base.py](src/models/base.py)              | 数据库连接配置    |
+| 数据库初始化  | [src/models/init\_db.py](src/models/init_db.py)       | 数据库初始化脚本   |
+| 数据库文件   | data/household.db                                     | SQLite 数据库 |
+| HTML 模板 | [doc/a3.html](doc/a3.html)                            | 成员信息模板     |
+| 照片目录    | static/member\_photos/                                | 成员照片存储     |
+| 依赖列表    | requirements.txt                                      | Python 依赖包 |
+| 项目文档    | [PROJECT\_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) | 本文档        |
 
----
+***
 
 ### 13.4 默认账号
 
-| 用户名 | 密码 | 角色 | 权限 |
-|--------|------|------|------|
+| 用户名   | 密码       | 角色    | 权限   |
+| ----- | -------- | ----- | ---- |
 | admin | admin123 | 超级管理员 | 所有权限 |
 
----
+***
 
 ### 13.5 快捷键
 
-| 功能 | 快捷键 |
-|------|--------|
+| 功能 | 快捷键    |
+| -- | ------ |
 | 保存 | Ctrl+S |
 | 搜索 | Ctrl+F |
-| 刷新 | F5 |
+| 刷新 | F5     |
 | 退出 | Alt+F4 |
 
----
+***
 
 ### 13.6 技术栈版本
 
@@ -3680,23 +3789,24 @@ Pillow == 10.2.0
 PyQt-Fluent-Widgets == latest
 ```
 
----
+***
 
 ## 结语
 
 本文档全面介绍了家庭户籍管理系统的架构、功能、开发和部署。如有疑问或建议，请提交 Issue 或联系开发团队。
 
-**文档版本**: 1.0  
-**最后更新**: 2026-04-10  
+**文档版本**: 1.0\
+**最后更新**: 2026-04-10\
 **维护者**: 开发团队
 
----
+***
 
 **相关文档**:
+
 - [快速开始指南](doc/STARTUP_GUIDE.md)
 - [成员字段规范](doc/HOUSEHOLD_MEMBER_FIELDS_SPEC.md)
 - [村字段规范](doc/VILLAGE_FIELDS_SPEC.md)
 
----
+***
 
 *本文档使用 Markdown 编写，可使用任意 Markdown 编辑器查看。*
