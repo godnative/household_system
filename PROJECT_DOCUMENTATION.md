@@ -45,8 +45,12 @@
 
 1. **用户认证与权限管理**
    - 基于角色的权限控制（RBAC）
-   - 支持超级管理员、堂区管理员、操作员等多种角色
+   - 三种角色：超级管理员、录入员、观察员
+   - 细粒度权限控制（堂区级别的数据访问限制）
+   - 完整的用户角色管理界面（添加、编辑、删除用户和角色）
+   - 动态权限配置（为角色分配不同权限组合）
    - 密码加密存储（bcrypt）
+   - 用户自助修改密码功能
 
 2. **堂区管理**
    - 堂区信息的增删改查
@@ -87,6 +91,38 @@
    - 自动备份原数据库（时间戳命名）
    - SQLite 数据库文件验证
    - 数据库信息显示（路径、大小、修改时间）
+
+8. **角色权限管理系统**
+   - **三种角色体系**：
+     - 超级管理员：拥有所有权限，可管理整个系统
+     - 录入员：可管理指定堂区的家庭和成员数据（完整 CRUD 权限）
+     - 观察员：只能查看指定堂区的数据（只读权限）
+   - **七种权限类型**：
+     - 用户管理权限（user_manage）
+     - 角色管理权限（role_manage）
+     - 堂区管理权限（village_manage）
+     - 家庭管理权限（household_manage）
+     - 家庭查看权限（household_view）
+     - 成员管理权限（member_manage）
+     - 成员查看权限（member_view）
+   - **用户管理功能**：
+     - 创建、编辑、删除用户
+     - 为用户分配角色
+     - 为录入员指定所属堂区
+     - 为观察员配置可访问的堂区列表
+     - 重置用户密码
+   - **角色管理功能**：
+     - 创建、编辑、删除角色
+     - 动态配置角色权限
+     - 查看角色权限详情
+   - **个人信息管理**：
+     - 所有用户可查看自己的信息
+     - 用户可自助修改密码
+   - **权限控制机制**：
+     - 基于用户角色的界面访问控制
+     - 基于堂区的数据访问过滤
+     - 动态禁用无权限的操作按钮
+     - 防止越权访问和操作
 
 ### 1.3 技术栈
 
@@ -1672,6 +1708,299 @@ def get_database_info():
 | `src/services/database_service.py` | 数据库服务，实现备份还原逻辑 |
 | `src/views/settings_view.py` | 系统设置界面，UI交互 |
 | `src/views/main_view.py` | 主窗口，集成系统设置页面 |
+
+---
+
+### 6.7 角色权限管理系统
+
+#### 6.7.1 功能概述
+
+完整的角色权限管理系统（RBAC），支持三种角色、七种权限，以及细粒度的堂区级别数据访问控制。
+
+**主要特性**：
+- 超级管理员可以管理所有用户、角色和数据
+- 录入员可以完整管理指定堂区的家庭和成员数据
+- 观察员只能查看指定堂区的数据（只读）
+- 支持动态权限配置和用户-堂区关联
+- 用户可自助修改密码
+
+#### 6.7.2 数据库模型
+
+**user_village_access 关联表**（多对多关系）：
+```python
+# src/models/auth.py
+user_village_access = Table('user_village_access', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('village_id', Integer, ForeignKey('villages.id'), primary_key=True)
+)
+```
+
+**User 模型扩展**：
+```python
+# src/models/user.py
+class User(Base):
+    village_id = Column(Integer, ForeignKey('villages.id'), nullable=True)  # 录入员的所属堂区
+    
+    # 观察员可访问的堂区列表（多对多关系）
+    accessible_villages = relationship('Village', secondary=user_village_access, backref='observers')
+```
+
+**权限常量定义**：
+```python
+# src/constants/permissions.py
+PERM_USER_MANAGE = 'user_manage'          # 用户管理权限
+PERM_ROLE_MANAGE = 'role_manage'          # 角色管理权限
+PERM_VILLAGE_MANAGE = 'village_manage'    # 堂区管理权限
+PERM_HOUSEHOLD_MANAGE = 'household_manage'  # 家庭完整管理权限
+PERM_HOUSEHOLD_VIEW = 'household_view'    # 家庭查看权限
+PERM_MEMBER_MANAGE = 'member_manage'      # 成员完整管理权限
+PERM_MEMBER_VIEW = 'member_view'          # 成员查看权限
+
+ROLE_SUPER_ADMIN = '超级管理员'
+ROLE_DATA_ENTRY = '录入员'
+ROLE_OBSERVER = '观察员'
+```
+
+#### 6.7.3 核心服务方法
+
+**AuthService 权限检查**：
+```python
+# src/services/auth_service.py
+
+@staticmethod
+def get_user_accessible_villages(user: User):
+    """
+    获取用户可访问的堂区ID列表
+    
+    Returns:
+        None: 超级管理员，可访问所有堂区
+        list[int]: 录入员/观察员，返回可访问的堂区ID列表
+    """
+    if AuthService.check_permission(user, PERM_USER_MANAGE):
+        return None  # 超级管理员
+    
+    if user.village_id:
+        return [user.village_id]  # 录入员
+    
+    if user.accessible_villages:
+        return [v.id for v in user.accessible_villages]  # 观察员
+    
+    return []
+
+@staticmethod
+def check_village_access(user: User, village_id: int) -> bool:
+    """检查用户是否可以访问指定堂区"""
+    accessible_villages = AuthService.get_user_accessible_villages(user)
+    if accessible_villages is None:
+        return True  # 超级管理员
+    return village_id in accessible_villages
+```
+
+**PermissionService 堂区分配**：
+```python
+# src/services/permission_service.py
+
+@staticmethod
+def assign_villages_to_user(db: Session, user_id: int, village_ids: list):
+    """为用户（观察员）分配可访问的堂区"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    
+    # 清除现有的堂区访问权限
+    db.execute(user_village_access.delete().where(
+        user_village_access.c.user_id == user_id
+    ))
+    
+    # 添加新的堂区访问权限
+    if village_ids:
+        villages = db.query(Village).filter(Village.id.in_(village_ids)).all()
+        user.accessible_villages = villages
+    
+    db.commit()
+    return user
+```
+
+#### 6.7.4 用户角色管理界面
+
+**UserRoleManagementView 主要功能**：
+
+1. **超级管理员视图**（双标签页）：
+   - **用户管理标签页**：
+     - 用户列表表格（用户名、角色、所属堂区/可访问堂区、操作）
+     - 添加用户对话框（用户名、密码、角色、堂区配置）
+     - 编辑用户对话框（修改角色、堂区、重置密码）
+     - 删除用户（确认对话框）
+   
+   - **角色管理标签页**：
+     - 角色列表表格（角色名、描述、操作）
+     - 添加角色对话框（角色名、描述、权限多选）
+     - 编辑角色对话框（修改描述、权限配置）
+     - 查看角色权限详情
+     - 删除角色（检查是否有用户使用）
+
+2. **普通用户视图**（个人信息卡片）：
+   - 显示用户名、角色、所属堂区/可访问堂区
+   - 修改密码按钮（弹出对话框：旧密码、新密码、确认新密码）
+
+**关键代码示例**：
+```python
+# src/views/user_role_management_view.py
+
+class UserRoleManagementView(QWidget):
+    def __init__(self, user, parent=None):
+        super().__init__(parent)
+        self.user = user
+        
+        # 检查用户是否是超级管理员
+        self.is_admin = (AuthService.check_permission(user, PERM_USER_MANAGE) or
+                        AuthService.check_permission(user, PERM_ROLE_MANAGE))
+        
+        if self.is_admin:
+            self._create_admin_view(layout)  # 完整管理界面
+        else:
+            self._create_user_view(layout)   # 个人信息界面
+```
+
+#### 6.7.5 权限控制实现
+
+**主导航权限控制**：
+```python
+# src/views/main_view.py
+
+def init_navigation(self):
+    # 用户角色管理（所有用户都能访问，但内容不同）
+    user_role_page = UserRoleManagementView(self.user, self)
+    self.addSubInterface(user_role_page, FIF.PEOPLE, '用户角色管理')
+    
+    # 系统设置（超级管理员）
+    if AuthService.check_permission(self.user, 'user_manage'):
+        settings_page = SettingsView(self)
+        self.addSubInterface(settings_page, FIF.SETTING, '系统设置')
+    
+    # 堂区管理（超级管理员）
+    if AuthService.check_permission(self.user, PERM_VILLAGE_MANAGE):
+        village_page = VillageWidget(self)
+        self.addSubInterface(village_page, FIF.MARKET, '堂区管理')
+    
+    # 家庭管理（有家庭管理或查看权限的用户）
+    if AuthService.check_permission(self.user, PERM_HOUSEHOLD_MANAGE) or \
+       AuthService.check_permission(self.user, PERM_HOUSEHOLD_VIEW):
+        household_page = HouseholdManagementWidget(self.user, self)
+        self.addSubInterface(household_page, FIF.IOT, '家庭管理')
+```
+
+**家庭管理权限过滤**：
+```python
+# src/views/household_management_view.py
+
+def load_villages(self):
+    """根据用户权限加载堂区"""
+    db = SessionLocal()
+    try:
+        # 根据用户权限过滤堂区
+        accessible_village_ids = AuthService.get_user_accessible_villages(self.user)
+        
+        if accessible_village_ids is None:
+            # 超级管理员，加载所有堂区
+            villages = VillageService.get_all_villages(db)
+        else:
+            # 录入员/观察员，只加载可访问的堂区
+            villages = [VillageService.get_village_by_id(db, vid) 
+                       for vid in accessible_village_ids]
+    finally:
+        db.close()
+
+def load_households(self, village_id=None):
+    """加载家庭数据并根据权限禁用按钮"""
+    has_manage_perm = AuthService.check_permission(self.user, PERM_HOUSEHOLD_MANAGE)
+    
+    # 设置按钮启用状态
+    edit_btn.setEnabled(has_manage_perm)
+    delete_btn.setEnabled(has_manage_perm)
+    self.add_household_btn.setEnabled(has_manage_perm)
+```
+
+#### 6.7.6 数据库初始化
+
+**角色和权限初始化**：
+```python
+# src/models/init_db.py
+
+def init_database():
+    # 创建权限
+    permissions = [
+        Permission(name=PERM_USER_MANAGE, description='用户管理权限'),
+        Permission(name=PERM_ROLE_MANAGE, description='角色管理权限'),
+        Permission(name=PERM_VILLAGE_MANAGE, description='堂区管理权限'),
+        Permission(name=PERM_HOUSEHOLD_MANAGE, description='家庭完整管理权限'),
+        Permission(name=PERM_HOUSEHOLD_VIEW, description='家庭查看权限'),
+        Permission(name=PERM_MEMBER_MANAGE, description='成员完整管理权限'),
+        Permission(name=PERM_MEMBER_VIEW, description='成员查看权限')
+    ]
+    
+    # 创建角色
+    super_admin = Role(name=ROLE_SUPER_ADMIN, description='拥有所有权限')
+    super_admin.permissions = permissions  # 所有权限
+    
+    data_entry = Role(name=ROLE_DATA_ENTRY, description='可以管理指定堂区的数据')
+    data_entry.permissions = [p for p in permissions 
+                             if p.name in [PERM_HOUSEHOLD_MANAGE, PERM_MEMBER_MANAGE]]
+    
+    observer = Role(name=ROLE_OBSERVER, description='只能查看指定堂区的数据')
+    observer.permissions = [p for p in permissions 
+                           if p.name in [PERM_HOUSEHOLD_VIEW, PERM_MEMBER_VIEW]]
+```
+
+#### 6.7.7 使用示例
+
+**创建用户的工作流**：
+
+1. **超级管理员登录** → 进入"用户角色管理"
+2. **点击"添加用户"** → 填写用户名、密码
+3. **选择角色**：
+   - 选择"录入员" → 在"所属堂区"中选择一个堂区
+   - 选择"观察员" → 在"可访问堂区"中勾选多个堂区
+4. **确认创建** → 新用户可以登录系统
+
+**录入员使用流程**：
+1. 登录系统 → 只能看到分配的堂区
+2. 进入"家庭管理" → 可以添加、编辑、删除家庭和成员
+3. 进入"用户角色管理" → 只能查看自己的信息和修改密码
+
+**观察员使用流程**：
+1. 登录系统 → 只能看到分配的堂区
+2. 进入"家庭管理" → 编辑/删除按钮被禁用（灰色）
+3. 可以查看所有信息，但无法修改
+
+#### 6.7.8 测试脚本
+
+**运行权限系统测试**：
+```bash
+python3 test_permissions.py
+```
+
+测试脚本会：
+1. 验证角色和权限是否正确创建
+2. 验证默认管理员用户
+3. 创建测试用户（录入员、观察员）
+4. 测试权限检查功能
+5. 测试堂区访问控制
+
+#### 6.7.9 核心代码位置
+
+| 文件 | 说明 |
+|------|------|
+| `src/constants/permissions.py` | 权限和角色常量定义 |
+| `src/models/auth.py` | user_village_access 关联表 |
+| `src/models/user.py` | User 模型扩展 |
+| `src/services/auth_service.py` | 权限检查和访问控制服务 |
+| `src/services/permission_service.py` | 角色权限管理服务 |
+| `src/views/user_role_management_view.py` | 用户角色管理界面（约900行） |
+| `src/views/main_view.py` | 主导航权限控制 |
+| `src/views/household_management_view.py` | 家庭管理权限控制 |
+| `src/models/init_db.py` | 角色权限初始化 |
+| `test_permissions.py` | 权限系统测试脚本 |
 
 ---
 

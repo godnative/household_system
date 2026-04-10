@@ -8,6 +8,12 @@ role_permissions = Table('role_permissions', Base.metadata,
     Column('permission_id', Integer, ForeignKey('permissions.id'), primary_key=True)
 )
 
+# 用户-堂区访问权限关联表（用于观察员的细粒度权限控制）
+user_village_access = Table('user_village_access', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('village_id', Integer, ForeignKey('villages.id'), primary_key=True)
+)
+
 class Role(Base):
     __tablename__ = 'roles'
     

@@ -8,10 +8,12 @@ from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, I
 from src.services.household_service import HouseholdService
 from src.services.member_service import MemberService
 from src.services.village_service import VillageService
+from src.services.auth_service import AuthService
 from src.models import SessionLocal, Household, Member
 from src.views.member_excel_renderer import get_member_excel_html
 from src.views.household_excel_renderer import get_household_excel_html
 from src.views.ui_components import MyDialog
+from src.constants import PERM_HOUSEHOLD_MANAGE, PERM_MEMBER_MANAGE
 from sqlalchemy.exc import IntegrityError
 
 
@@ -53,8 +55,9 @@ def resize_and_save_photo(source_path, target_path, target_width=120, target_hei
 
 
 class HouseholdManagementWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, user, parent=None):
         super().__init__(parent)
+        self.user = user  # 保存用户对象
         self.init_ui()
         self.load_villages()
     
@@ -85,15 +88,18 @@ class HouseholdManagementWidget(QWidget):
         household_title = QLabel('家庭管理')
         household_title.setStyleSheet('font-size: 16px; font-weight: bold;')
         household_title_layout.addWidget(household_title)
-        
-        add_household_btn = PrimaryPushButton('添加家庭')
-        add_household_btn.clicked.connect(self.add_household)
-        household_title_layout.addWidget(add_household_btn)
-        
+
+        self.add_household_btn = PrimaryPushButton('添加家庭')
+        self.add_household_btn.clicked.connect(self.add_household)
+        # 根据权限设置是否启用
+        has_manage_perm = AuthService.check_permission(self.user, PERM_HOUSEHOLD_MANAGE)
+        self.add_household_btn.setEnabled(has_manage_perm)
+        household_title_layout.addWidget(self.add_household_btn)
+
         refresh_household_btn = PushButton('刷新')
         refresh_household_btn.clicked.connect(self.load_households)
         household_title_layout.addWidget(refresh_household_btn)
-        
+
         left_layout.addLayout(household_title_layout)
         
         # 家庭表格
@@ -118,16 +124,16 @@ class HouseholdManagementWidget(QWidget):
         member_title = QLabel('成员管理')
         member_title.setStyleSheet('font-size: 16px; font-weight: bold;')
         member_title_layout.addWidget(member_title)
-        
+
         self.add_member_btn = PrimaryPushButton('添加成员')
         self.add_member_btn.clicked.connect(self.add_member)
-        self.add_member_btn.setEnabled(False)
+        self.add_member_btn.setEnabled(False)  # 初始状态禁用，选择家庭后根据权限启用
         member_title_layout.addWidget(self.add_member_btn)
-        
+
         refresh_member_btn = PushButton('刷新')
         refresh_member_btn.clicked.connect(self.load_members)
         member_title_layout.addWidget(refresh_member_btn)
-        
+
         right_layout.addLayout(member_title_layout)
         
         # 成员标签栏
@@ -153,7 +159,20 @@ class HouseholdManagementWidget(QWidget):
         """ 加载堂区数据 """
         db = SessionLocal()
         try:
-            villages = VillageService.get_all_villages(db)
+            # 根据用户权限过滤堂区
+            accessible_village_ids = AuthService.get_user_accessible_villages(self.user)
+
+            if accessible_village_ids is None:
+                # 超级管理员，加载所有堂区
+                villages = VillageService.get_all_villages(db)
+            else:
+                # 录入员/观察员，只加载可访问的堂区
+                villages = []
+                for vid in accessible_village_ids:
+                    village = VillageService.get_village_by_id(db, vid)
+                    if village:
+                        villages.append(village)
+
             self.village_combo.clear()
             for village in villages:
                 self.village_combo.addItem(village.name)
@@ -177,7 +196,9 @@ class HouseholdManagementWidget(QWidget):
         household_id = int(self.household_table.item(row, 0).text())
         if household_id:
             self.load_members(household_id)
-            self.add_member_btn.setEnabled(True)
+            # 根据权限设置添加成员按钮是否启用
+            has_manage_perm = AuthService.check_permission(self.user, PERM_MEMBER_MANAGE)
+            self.add_member_btn.setEnabled(has_manage_perm)
     
     def on_tab_changed(self, index):
         """ 标签切换时的处理 """
@@ -186,6 +207,16 @@ class HouseholdManagementWidget(QWidget):
     
     def on_tab_close_requested(self, index):
         """ 标签关闭时的处理 """
+        # 检查是否有成员管理权限
+        if not AuthService.check_permission(self.user, PERM_MEMBER_MANAGE):
+            InfoBar.warning(
+                title='权限不足',
+                content='您没有删除成员的权限',
+                parent=self,
+                position=InfoBarPosition.TOP
+            )
+            return
+
         # 获取成员ID
         if index < len(self.tab_bar.items):
             tab_item = self.tab_bar.items[index]
@@ -216,10 +247,13 @@ class HouseholdManagementWidget(QWidget):
 
         if village_id is False:
             village_id = self.village_combo.currentData()
-        
+
         # 加载家庭数据
         db = SessionLocal()
         try:
+            # 检查用户是否有管理权限
+            has_manage_perm = AuthService.check_permission(self.user, PERM_HOUSEHOLD_MANAGE)
+
             households = HouseholdService.get_all_households(db, village_id=village_id)
             for i, household in enumerate(households):
                 self.household_table.insertRow(i)
@@ -237,6 +271,10 @@ class HouseholdManagementWidget(QWidget):
                 print_btn = PushButton('打印')
                 print_btn.clicked.connect(lambda _, h=household: self.print_household(h))
 
+                # 根据权限禁用编辑/删除按钮
+                edit_btn.setEnabled(has_manage_perm)
+                delete_btn.setEnabled(has_manage_perm)
+
                 btn_widget = QWidget()
                 btn_widget.setLayout(btn_layout)
                 btn_layout.addWidget(view_btn)
@@ -245,7 +283,7 @@ class HouseholdManagementWidget(QWidget):
                 btn_layout.addWidget(print_btn)
 
                 self.household_table.setCellWidget(i, 2, btn_widget)
-            
+
             # 调整列宽
             self.household_table.resizeColumnsToContents()
         finally:
@@ -564,10 +602,13 @@ class HouseholdManagementWidget(QWidget):
         """ 加载成员数据 """
         if not household_id:
             return
-        
+
         # 清空成员标签
         self.clear_member_cards()
-        
+
+        # 检查用户是否有成员管理权限
+        has_manage_perm = AuthService.check_permission(self.user, PERM_MEMBER_MANAGE)
+
         # 加载成员数据
         db = SessionLocal()
         try:
@@ -575,16 +616,16 @@ class HouseholdManagementWidget(QWidget):
             for member in members:
                 # 创建标签
                 tab_item = self.tab_bar.addTab(str(member.id), member.name)
-                
+
                 # 创建标签内容页面
                 member_widget = QWidget()
                 main_layout = QVBoxLayout(member_widget)
-                
+
                 # 创建滚动区域
                 scroll_area = QScrollArea()
                 scroll_content = QWidget()
                 scroll_layout = QVBoxLayout(scroll_content)
-                
+
                 # 创建Web引擎视图显示表格
                 # web_view = QWebEngineView()
                 # web_view.setHtml(get_member_excel_html(member))
@@ -595,20 +636,21 @@ class HouseholdManagementWidget(QWidget):
                 selfTextEdit.setHtml(get_member_excel_html(member))
                 selfTextEdit.setMinimumHeight(500)
                 scroll_layout.addWidget(selfTextEdit)
-                
-                # 添加修改按钮
+
+                # 添加修改按钮（根据权限决定是否启用）
                 edit_btn = PrimaryPushButton('修改成员信息')
                 edit_btn.clicked.connect(partial(self.edit_member, member))
+                edit_btn.setEnabled(has_manage_perm)
                 scroll_layout.addWidget(edit_btn)
                 scroll_layout.addStretch()
-                
+
                 scroll_area.setWidget(scroll_content)
                 scroll_area.setWidgetResizable(True)
                 main_layout.addWidget(scroll_area)
-                
+
                 # 添加到堆叠窗口
                 self.stacked_widget.addWidget(member_widget)
-                
+
                 # 连接标签和内容页面
                 # 保存成员ID到标签项的属性中
                 if tab_item:
