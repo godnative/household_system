@@ -1,9 +1,11 @@
 def get_member_excel_html(member):
     """
-    生成成员信息的 HTML 表格，使用 a1.html 模板
+    生成成员信息的 HTML 表格，使用 a3.html 模板
     """
-    # 读取 a1.html 模板文件
-    with open(r"D:\dev\newhuanwei\household_system\doc\a3.html", 'r', encoding='utf-8') as f:
+    import os
+    # 读取 a3.html 模板文件 - 使用相对路径
+    template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'doc', 'a3.html')
+    with open(template_path, 'r', encoding='utf-8') as f:
         html = f.read()
     
     # 替换数据项
@@ -64,6 +66,22 @@ def get_member_excel_html(member):
     # 图片处理
     # 找到图片单元格并替换内容
     if member.photo:
-        html = html.replace('<p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:14px; font-weight:600;">图片</span></p>', f'<p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:14px; font-weight:600;">图片</span></p><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><img src="{member.photo}" alt="成员照片" style="width: 120px; height: 160px; object-fit: cover;" /></p>')
+        # 将相对路径转换为绝对路径
+        import os
+        from pathlib import Path
+
+        # 获取项目根目录
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        # 构建完整的照片路径
+        photo_abs_path = os.path.join(project_root, 'static', member.photo)
+
+        # 转换为 file:// URL 格式，QTextEdit 需要这种格式
+        # 使用 Path.as_uri() 自动处理 Windows/Unix 路径差异
+        photo_url = Path(photo_abs_path).as_uri()
+
+        html = html.replace(
+            '<p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:14px; font-weight:600;">图片</span></p>',
+            f'<p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:14px; font-weight:600;">图片</span></p><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><img src="{photo_url}" alt="成员照片" style="width: 120px; height: 160px; object-fit: cover;" /></p>'
+        )
 
     return html

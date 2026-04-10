@@ -44,12 +44,12 @@ class ViewWindow(QWidget):
         layout = QVBoxLayout(self)
         
         # 标题
-        title_label = TitleLabel('村庄-家庭-成员查看')
+        title_label = TitleLabel('堂区-家庭-成员查看')
         layout.addWidget(title_label)
-        
-        # 村庄选择
+
+        # 堂区选择
         village_layout = QHBoxLayout()
-        village_label = QLabel('选择村庄:')
+        village_label = QLabel('选择堂区:')
         self.village_combo = ComboBox()
         self.village_combo.currentIndexChanged.connect(self.on_village_changed)
         village_layout.addWidget(village_label)
@@ -82,7 +82,7 @@ class ViewWindow(QWidget):
         layout.addLayout(main_layout)
     
     def load_villages(self):
-        """ 加载村庄数据 """
+        """ 加载堂区数据 """
         db = SessionLocal()
         try:
             villages = VillageService.get_all_villages(db)
@@ -96,7 +96,7 @@ class ViewWindow(QWidget):
             db.close()
     
     def on_village_changed(self, index):
-        """ 村庄选择变化时的处理 """
+        """ 堂区选择变化时的处理 """
         village_id = self.village_combo.currentData()
         if village_id:
             self.load_households(village_id)
@@ -108,7 +108,10 @@ class ViewWindow(QWidget):
             households = HouseholdService.get_all_households(db, village_id=village_id)
             self.household_list.clear()
             for household in households:
-                item = QListWidgetItem(household.household_code)
+                display_text = f"家庭 {household.id}"
+                if household.head_of_household:
+                    display_text += f" - {household.head_of_household}"
+                item = QListWidgetItem(display_text)
                 item.setData(Qt.UserRole, household.id)
                 self.household_list.addItem(item)
             if households:

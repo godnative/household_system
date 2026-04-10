@@ -28,7 +28,7 @@ class App(QApplication):
         permissions = [
             Permission(id=1, name='user_manage', description='用户管理权限'),
             Permission(id=2, name='role_manage', description='角色管理权限'),
-            Permission(id=3, name='village_manage', description='村庄管理权限'),
+            Permission(id=3, name='village_manage', description='堂区管理权限'),
             Permission(id=4, name='household_manage', description='家庭管理权限'),
             Permission(id=5, name='member_manage', description='成员管理权限')
         ]

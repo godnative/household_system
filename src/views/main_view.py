@@ -38,11 +38,11 @@ class MainView(MSFluentWindow):
             sys_page.setObjectName('system')
             self.addSubInterface(sys_page, FIF.SETTING, '系统管理')
         
-        # 村管理
+        # 堂区管理
         if AuthService.check_permission(self.user, 'village_manage'):
             village_page = VillageWidget(self)
             village_page.setObjectName('village')
-            self.addSubInterface(village_page, FIF.HOME, '村管理')
+            self.addSubInterface(village_page, FIF.HOME, '堂区管理')
         
         # 家庭管理
         if AuthService.check_permission(self.user, 'household_manage') or AuthService.check_permission(self.user, 'member_manage'):

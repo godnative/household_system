@@ -18,7 +18,7 @@ def init_database():
             permissions = [
                 Permission(name='user_manage', description='用户管理'),
                 Permission(name='role_manage', description='角色管理'),
-                Permission(name='village_manage', description='村管理'),
+                Permission(name='village_manage', description='堂区管理'),
                 Permission(name='household_manage', description='家庭管理'),
                 Permission(name='member_manage', description='成员管理')
             ]
@@ -27,7 +27,7 @@ def init_database():
             
             # 创建默认角色
             admin_role = Role(name='超级管理员', description='拥有所有权限')
-            village_admin_role = Role(name='村管理员', description='管理本村的所有数据')
+            village_admin_role = Role(name='堂区管理员', description='管理本村的所有数据')
             operator_role = Role(name='操作员', description='只能操作指定范围内的数据')
             
             # 为角色分配权限

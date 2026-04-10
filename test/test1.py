@@ -36,7 +36,7 @@ class ExcelWebEngineViewer(QMainWindow):
         # ========================
         # 核心：Web 引擎浏览器控件
         # ========================
-        self.web = QWebEngineView()
+        self.web = QTextEdit()
         layout.addWidget(self.web)
 
     # ------------------------------

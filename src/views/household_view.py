@@ -37,8 +37,8 @@ class HouseholdWidget(QWidget):
         self.table.setBorderVisible(True)
         self.table.setBorderRadius(8)
         self.table.setWordWrap(False)
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(['ID', '家庭编号', '村庄', '操作'])
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(['ID', '堂区', '操作'])
         self.table.verticalHeader().hide()
         # 设置行高
         self.table.verticalHeader().setDefaultSectionSize(60)
@@ -55,22 +55,21 @@ class HouseholdWidget(QWidget):
             for i, household in enumerate(households):
                 self.table.insertRow(i)
                 self.table.setItem(i, 0, QTableWidgetItem(str(household.id)))
-                self.table.setItem(i, 1, QTableWidgetItem(household.household_code))
-                self.table.setItem(i, 2, QTableWidgetItem(household.village.name if household.village else ''))
-                
+                self.table.setItem(i, 1, QTableWidgetItem(household.village.name if household.village else ''))
+
                 # 操作按钮
                 btn_layout = QHBoxLayout()
                 edit_btn = PushButton('编辑')
                 edit_btn.clicked.connect(lambda _, h=household: self.edit_household(h))
                 delete_btn = PushButton('删除')
                 delete_btn.clicked.connect(lambda _, h=household: self.delete_household(h))
-                
+
                 btn_widget = QWidget()
                 btn_widget.setLayout(btn_layout)
                 btn_layout.addWidget(edit_btn)
                 btn_layout.addWidget(delete_btn)
-                
-                self.table.setCellWidget(i, 3, btn_widget)
+
+                self.table.setCellWidget(i, 2, btn_widget)
             
             # 调整列宽
             self.table.resizeColumnsToContents()
@@ -84,12 +83,8 @@ class HouseholdWidget(QWidget):
         # 创建内容 widget
         content = QWidget()
         layout = QFormLayout(content)
-        
-        # 家庭编号
-        household_number_edit = QLineEdit()
-        layout.addRow('家庭编号:', household_number_edit)
-        
-        # 村庄选择
+
+        # 堂区选择
         village_combo = QComboBox()
         db = SessionLocal()
         try:
@@ -98,7 +93,7 @@ class HouseholdWidget(QWidget):
                 village_combo.addItem(village.name, village.id)
         finally:
             db.close()
-        layout.addRow('所属村庄:', village_combo)
+        layout.addRow('所属堂区:', village_combo)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -110,21 +105,23 @@ class HouseholdWidget(QWidget):
         
         # 处理对话框结果
         if dialog.exec():
-            household_number = household_number_edit.text().strip()
             village_id = village_combo.currentData()
-            if household_number and village_id:
+            if village_id:
                 db = SessionLocal()
                 try:
-                    HouseholdService.create_household(db, village_id=village_id, household_code=household_number)
+                    HouseholdService.create_household(db, village_id=village_id, plot_number=1, address='')
                     self.load_households()
-                except IntegrityError:
+                except Exception as e:
                     db.rollback()
+                    print("失败！！！！")
+                    print(e)
                     InfoBar.error(
                         title='添加失败',
-                        content='家庭编号已存在，请使用其他编号',
+                        content=f'添加家庭失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
+                    
                 finally:
                     db.close()
     
@@ -135,12 +132,8 @@ class HouseholdWidget(QWidget):
         # 创建内容 widget
         content = QWidget()
         layout = QFormLayout(content)
-        
-        # 家庭编号
-        household_number_edit = QLineEdit(household.household_code)
-        layout.addRow('家庭编号:', household_number_edit)
-        
-        # 村庄选择
+
+        # 堂区选择
         village_combo = QComboBox()
         db = SessionLocal()
         try:
@@ -151,7 +144,7 @@ class HouseholdWidget(QWidget):
                     village_combo.setCurrentIndex(village_combo.count() - 1)
         finally:
             db.close()
-        layout.addRow('所属村庄:', village_combo)
+        layout.addRow('所属堂区:', village_combo)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -163,18 +156,17 @@ class HouseholdWidget(QWidget):
         
         # 处理对话框结果
         if dialog.exec():
-            household_number = household_number_edit.text().strip()
             village_id = village_combo.currentData()
-            if household_number and village_id:
+            if village_id:
                 db = SessionLocal()
                 try:
-                    HouseholdService.update_household(db, household.id, village_id=village_id, household_code=household_number)
+                    HouseholdService.update_household(db, household.id, village_id=village_id)
                     self.load_households()
-                except IntegrityError:
+                except Exception as e:
                     db.rollback()
                     InfoBar.error(
                         title='修改失败',
-                        content='家庭编号已存在，请使用其他编号',
+                        content=f'修改家庭失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )

@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidgetItem, QFormLayout, QLineEdit, QLabel, QComboBox, QScrollArea, QDateEdit, QTextEdit, QStackedWidget, QGroupBox, QGridLayout, QFileDialog
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtGui import QPixmap, QImage
 from functools import partial
 import os
 from qfluentwidgets import PrimaryPushButton, PushButton, TableWidget, Dialog, InfoBar, InfoBarPosition, ComboBox, FlowLayout, ElevatedCardWidget, BodyLabel, CaptionLabel, TitleLabel, Flyout, FlyoutView, TabBar, TabCloseButtonDisplayMode
@@ -12,6 +11,44 @@ from src.models import SessionLocal, Household, Member
 from src.views.member_excel_renderer import get_member_excel_html
 from src.views.ui_components import MyDialog
 from sqlalchemy.exc import IntegrityError
+
+
+def resize_and_save_photo(source_path, target_path, target_width=120, target_height=160):
+    """
+    调整照片尺寸并保存
+
+    Args:
+        source_path: 源照片路径
+        target_path: 目标保存路径
+        target_width: 目标宽度（像素），默认120
+        target_height: 目标高度（像素），默认160
+    """
+    try:
+        # 加载图片
+        pixmap = QPixmap(source_path)
+
+        # 调整尺寸，保持宽高比，如果需要的话会裁剪
+        # 使用 Qt.KeepAspectRatioByExpanding 确保填满目标尺寸
+        scaled_pixmap = pixmap.scaled(
+            target_width,
+            target_height,
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation
+        )
+
+        # 如果缩放后的图片超过目标尺寸，进行居中裁剪
+        if scaled_pixmap.width() > target_width or scaled_pixmap.height() > target_height:
+            x = (scaled_pixmap.width() - target_width) // 2
+            y = (scaled_pixmap.height() - target_height) // 2
+            scaled_pixmap = scaled_pixmap.copy(x, y, target_width, target_height)
+
+        # 保存图片
+        scaled_pixmap.save(target_path, quality=90)
+        return True
+    except Exception as e:
+        print(f"图片处理失败: {e}")
+        return False
+
 
 class HouseholdManagementWidget(QWidget):
     def __init__(self, parent=None):
@@ -25,9 +62,9 @@ class HouseholdManagementWidget(QWidget):
         self.householdlayoutratio = 42
         self.memberlayoutratio    = 100 - self.householdlayoutratio
         
-        # 顶部村庄选择（占10%高度）
+        # 顶部堂区选择（占10%高度）
         village_layout = QHBoxLayout()
-        village_label = QLabel('选择村庄:')
+        village_label = QLabel('选择堂区:')
         self.village_combo = ComboBox()
         self.village_combo.currentIndexChanged.connect(self.on_village_changed)
         village_layout.addWidget(village_label)
@@ -62,8 +99,8 @@ class HouseholdManagementWidget(QWidget):
         self.household_table.setBorderVisible(True)
         self.household_table.setBorderRadius(8)
         self.household_table.setWordWrap(False)
-        self.household_table.setColumnCount(4)
-        self.household_table.setHorizontalHeaderLabels(['ID', '家庭编号', '户主', '操作'])
+        self.household_table.setColumnCount(3)
+        self.household_table.setHorizontalHeaderLabels(['ID', '户主', '操作'])
         self.household_table.verticalHeader().hide()
         self.household_table.verticalHeader().setDefaultSectionSize(60)
         self.household_table.itemClicked.connect(self.on_household_clicked)
@@ -111,7 +148,7 @@ class HouseholdManagementWidget(QWidget):
         layout.addLayout(main_layout)
     
     def load_villages(self):
-        """ 加载村庄数据 """
+        """ 加载堂区数据 """
         db = SessionLocal()
         try:
             villages = VillageService.get_all_villages(db)
@@ -125,7 +162,7 @@ class HouseholdManagementWidget(QWidget):
             db.close()
     
     def on_village_changed(self, index):
-        """ 村庄选择变化时的处理 """
+        """ 堂区选择变化时的处理 """
         village_id = self.village_combo.currentData()
         if village_id:
             self.load_households(village_id)
@@ -171,6 +208,8 @@ class HouseholdManagementWidget(QWidget):
     def load_households(self, village_id=None):
         """ 加载家庭数据 """
         # 清空表格
+        if not village_id:
+            self.load_villages()
         self.household_table.setRowCount(0)
 
         if village_id is False:
@@ -183,9 +222,8 @@ class HouseholdManagementWidget(QWidget):
             for i, household in enumerate(households):
                 self.household_table.insertRow(i)
                 self.household_table.setItem(i, 0, QTableWidgetItem(str(household.id)))
-                self.household_table.setItem(i, 1, QTableWidgetItem(household.household_code))
-                self.household_table.setItem(i, 2, QTableWidgetItem(household.head_of_household if household.head_of_household else '无'))
-                
+                self.household_table.setItem(i, 1, QTableWidgetItem(household.head_of_household if household.head_of_household else '无'))
+
                 # 操作按钮
                 btn_layout = QHBoxLayout()
                 view_btn = PushButton('查看')
@@ -194,14 +232,14 @@ class HouseholdManagementWidget(QWidget):
                 edit_btn.clicked.connect(lambda _, h=household: self.edit_household(h))
                 delete_btn = PushButton('删除')
                 delete_btn.clicked.connect(lambda _, h=household: self.delete_household(h))
-                
+
                 btn_widget = QWidget()
                 btn_widget.setLayout(btn_layout)
                 btn_layout.addWidget(view_btn)
                 btn_layout.addWidget(edit_btn)
                 btn_layout.addWidget(delete_btn)
-                
-                self.household_table.setCellWidget(i, 3, btn_widget)
+
+                self.household_table.setCellWidget(i, 2, btn_widget)
             
             # 调整列宽
             self.household_table.resizeColumnsToContents()
@@ -212,10 +250,10 @@ class HouseholdManagementWidget(QWidget):
         """ 查看家庭详细信息 """
         view = FlyoutView(
             title='家庭详细信息',
-            content=f'家庭户号: {household.id}\n家庭编号: {household.household_code}\n片号: {household.plot_number}\n村庄: {household.village.name if household.village else ""}\n家庭住址: {household.address if household.address else "无"}\n电话: {household.phone if household.phone else "无"}\n户主: {household.head_of_household if household.head_of_household else "无"}',
+            content=f'家庭户号: {household.id}\n片号: {household.plot_number}\n堂区: {household.village.name if household.village else ""}\n家庭住址: {household.address if household.address else "无"}\n电话: {household.phone if household.phone else "无"}\n户主: {household.head_of_household if household.head_of_household else "无"}',
             isClosable=True
         )
-        
+
         # 显示视图
         w = Flyout.make(view, self.sender(), self)
         view.closed.connect(w.close)
@@ -233,16 +271,12 @@ class HouseholdManagementWidget(QWidget):
         household_id_edit.setText('系统自动生成')
         household_id_edit.setReadOnly(True)
         layout.addRow('家庭户号:', household_id_edit)
-        
-        # 家庭编号
-        household_code_edit = QLineEdit()
-        layout.addRow('家庭编号:', household_code_edit)
-        
+
         # 片号
         plot_number_edit = QLineEdit()
         layout.addRow('片号:', plot_number_edit)
         
-        # 村庄选择
+        # 堂区选择
         village_combo = QComboBox()
         db = SessionLocal()
         try:
@@ -251,7 +285,7 @@ class HouseholdManagementWidget(QWidget):
                 village_combo.addItem(village.name, village.id)
         finally:
             db.close()
-        layout.addRow('所属村庄:', village_combo)
+        layout.addRow('所属堂区:', village_combo)
         
         # 家庭地址
         address_edit = QLineEdit()
@@ -277,22 +311,12 @@ class HouseholdManagementWidget(QWidget):
         
         # 处理对话框结果
         if dialog.exec():
-            household_code = household_code_edit.text().strip()
             plot_number = plot_number_edit.text().strip()
             village_id = village_combo.currentData()
             address = address_edit.text().strip()
             phone = phone_edit.text().strip()
-            
+
             # 验证输入
-            if not household_code:
-                InfoBar.error(
-                    title='添加失败',
-                    content='家庭编号不能为空',
-                    parent=self,
-                    position=InfoBarPosition.TOP
-                )
-                return
-            
             if not plot_number or not plot_number.isdigit():
                 InfoBar.error(
                     title='添加失败',
@@ -301,7 +325,7 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if not address:
                 InfoBar.error(
                     title='添加失败',
@@ -310,7 +334,7 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if phone and not phone.isdigit():
                 InfoBar.error(
                     title='添加失败',
@@ -319,25 +343,24 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if village_id:
                 db = SessionLocal()
                 try:
                     HouseholdService.create_household(
-                        db, 
-                        village_id=village_id, 
-                        household_code=household_code, 
+                        db,
+                        village_id=village_id,
                         plot_number=int(plot_number),
                         address=address,
                         phone=phone,
                         head_of_household=None
                     )
                     self.load_households(self.village_combo.currentData())
-                except IntegrityError:
+                except Exception as e:
                     db.rollback()
                     InfoBar.error(
                         title='添加失败',
-                        content='家庭编号已存在，请使用其他编号',
+                        content=f'添加家庭失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -356,16 +379,12 @@ class HouseholdManagementWidget(QWidget):
         household_id_edit = QLineEdit(str(household.id))
         household_id_edit.setReadOnly(True)
         layout.addRow('家庭户号:', household_id_edit)
-        
-        # 家庭编号
-        household_code_edit = QLineEdit(household.household_code)
-        layout.addRow('家庭编号:', household_code_edit)
-        
+
         # 片号
         plot_number_edit = QLineEdit(str(household.plot_number))
         layout.addRow('片号:', plot_number_edit)
         
-        # 村庄选择
+        # 堂区选择
         village_combo = QComboBox()
         db = SessionLocal()
         try:
@@ -376,7 +395,7 @@ class HouseholdManagementWidget(QWidget):
                     village_combo.setCurrentIndex(village_combo.count() - 1)
         finally:
             db.close()
-        layout.addRow('所属村庄:', village_combo)
+        layout.addRow('所属堂区:', village_combo)
         
         # 家庭地址
         address_edit = QLineEdit(household.address if household.address else '')
@@ -401,22 +420,12 @@ class HouseholdManagementWidget(QWidget):
         
         # 处理对话框结果
         if dialog.exec():
-            household_code = household_code_edit.text().strip()
             plot_number = plot_number_edit.text().strip()
             village_id = village_combo.currentData()
             address = address_edit.text().strip()
             phone = phone_edit.text().strip()
-            
+
             # 验证输入
-            if not household_code:
-                InfoBar.error(
-                    title='修改失败',
-                    content='家庭编号不能为空',
-                    parent=self,
-                    position=InfoBarPosition.TOP
-                )
-                return
-            
             if not plot_number or not plot_number.isdigit():
                 InfoBar.error(
                     title='修改失败',
@@ -425,7 +434,7 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if not address:
                 InfoBar.error(
                     title='修改失败',
@@ -434,7 +443,7 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if phone and not phone.isdigit():
                 InfoBar.error(
                     title='修改失败',
@@ -443,25 +452,24 @@ class HouseholdManagementWidget(QWidget):
                     position=InfoBarPosition.TOP
                 )
                 return
-            
-            if household_code and village_id:
+
+            if village_id:
                 db = SessionLocal()
                 try:
                     HouseholdService.update_household(
-                        db, 
-                        household.id, 
-                        village_id=village_id, 
-                        household_code=household_code, 
+                        db,
+                        household.id,
+                        village_id=village_id,
                         plot_number=int(plot_number),
                         address=address,
                         phone=phone
                     )
                     self.load_households(self.village_combo.currentData())
-                except IntegrityError:
+                except Exception as e:
                     db.rollback()
                     InfoBar.error(
                         title='修改失败',
-                        content='家庭编号已存在，请使用其他编号',
+                        content=f'修改家庭失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -493,7 +501,7 @@ class HouseholdManagementWidget(QWidget):
     
     def refresh_all(self):
         """ 刷新所有数据 """
-        # 刷新村庄数据
+        # 刷新堂区数据
         self.load_villages()
     
     def load_members(self, household_id=None):
@@ -928,18 +936,23 @@ class HouseholdManagementWidget(QWidget):
                 # 确保照片目录存在
                 photo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'member_photos')
                 os.makedirs(photo_dir, exist_ok=True)
-                
+
                 # 生成唯一的照片文件名
                 import time
                 photo_filename = f'member_{int(time.time())}_{os.path.basename(photo_path)}'
                 photo_path_save = os.path.join(photo_dir, photo_filename)
-                
-                # 复制照片到目标目录
-                import shutil
-                shutil.copy(photo_path, photo_path_save)
-                
-                # 存储相对路径
-                photo = f'member_photos/{photo_filename}'
+
+                # 调整照片尺寸并保存（120x160像素）
+                if resize_and_save_photo(photo_path, photo_path_save, target_width=120, target_height=160):
+                    # 存储相对路径
+                    photo = f'member_photos/{photo_filename}'
+                else:
+                    InfoBar.warning(
+                        title='警告',
+                        content='照片处理失败，将不保存照片',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
             
             if name and gender:
                 db = SessionLocal()
@@ -1511,18 +1524,23 @@ class HouseholdManagementWidget(QWidget):
                 # 确保照片目录存在
                 photo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'member_photos')
                 os.makedirs(photo_dir, exist_ok=True)
-                
+
                 # 生成唯一的照片文件名
                 import time
                 photo_filename = f'member_{int(time.time())}_{os.path.basename(photo_path)}'
                 photo_path_save = os.path.join(photo_dir, photo_filename)
-                
-                # 复制照片到目标目录
-                import shutil
-                shutil.copy(photo_path, photo_path_save)
-                
-                # 存储相对路径
-                photo = f'member_photos/{photo_filename}'
+
+                # 调整照片尺寸并保存（120x160像素）
+                if resize_and_save_photo(photo_path, photo_path_save, target_width=120, target_height=160):
+                    # 存储相对路径
+                    photo = f'member_photos/{photo_filename}'
+                else:
+                    InfoBar.warning(
+                        title='警告',
+                        content='照片处理失败，保留原有照片',
+                        parent=self,
+                        position=InfoBarPosition.TOP
+                    )
             
             if name and gender:
                 db = SessionLocal()

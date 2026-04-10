@@ -57,7 +57,10 @@ class HouseholdRichTextView(QWidget):
             households = HouseholdService.get_all_households(db)
             self.household_combo.clear()
             for household in households:
-                self.household_combo.addItem(f'{household.household_code} - {household.head_of_household}', household.id)
+                display_text = f'家庭 {household.id}'
+                if household.head_of_household:
+                    display_text += f' - {household.head_of_household}'
+                self.household_combo.addItem(display_text, household.id)
             if households:
                 self.on_household_changed(0)
         finally:
@@ -103,8 +106,8 @@ class HouseholdRichTextView(QWidget):
                 <th style="text-align: left; width: 80%;">内容</th>
             </tr>
             <tr>
-                <td>家庭编号</td>
-                <td>{household.household_code}</td>
+                <td>家庭ID</td>
+                <td>{household.id}</td>
             </tr>
             <tr bgcolor="#f9f9f9">
                 <td>户主</td>

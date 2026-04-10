@@ -57,7 +57,7 @@ class MemberWidget(QWidget):
                 self.table.setItem(i, 0, QTableWidgetItem(str(member.id)))
                 self.table.setItem(i, 1, QTableWidgetItem(member.name))
                 self.table.setItem(i, 2, QTableWidgetItem(member.id_number))
-                self.table.setItem(i, 3, QTableWidgetItem(member.household.household_code if member.household else ''))
+                self.table.setItem(i, 3, QTableWidgetItem(f"家庭 {member.household.id}" if member.household else ''))
                 
                 # 操作按钮
                 btn_layout = QHBoxLayout()
@@ -100,7 +100,10 @@ class MemberWidget(QWidget):
         try:
             households = HouseholdService.get_all_households(db)
             for household in households:
-                household_combo.addItem(household.household_code, household.id)
+                display_text = f"家庭 {household.id}"
+                if household.head_of_household:
+                    display_text += f" - {household.head_of_household}"
+                household_combo.addItem(display_text, household.id)
         finally:
             db.close()
         layout.addRow('所属家庭:', household_combo)
@@ -156,7 +159,10 @@ class MemberWidget(QWidget):
         try:
             households = HouseholdService.get_all_households(db)
             for household in households:
-                household_combo.addItem(household.household_code, household.id)
+                display_text = f"家庭 {household.id}"
+                if household.head_of_household:
+                    display_text += f" - {household.head_of_household}"
+                household_combo.addItem(display_text, household.id)
                 if household.id == member.household_id:
                     household_combo.setCurrentIndex(household_combo.count() - 1)
         finally:

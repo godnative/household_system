@@ -55,17 +55,17 @@ class VillageWidget(QWidget):
         # 主布局改为水平布局
         main_layout = QHBoxLayout(self)
         
-        # 左侧布局（村庄列表）
+        # 左侧布局（堂区列表）
         left_layout = QVBoxLayout()
         
         # 标题
-        title_label = QLabel('村庄管理')
+        title_label = QLabel('堂区管理')
         title_label.setStyleSheet('font-size: 18px; font-weight: bold;')
         left_layout.addWidget(title_label)
-        
+
         # 操作按钮
         btn_layout = QHBoxLayout()
-        add_btn = PrimaryPushButton('添加村庄')
+        add_btn = PrimaryPushButton('添加堂区')
         add_btn.clicked.connect(self.add_village)
         btn_layout.addWidget(add_btn)
         
@@ -81,7 +81,7 @@ class VillageWidget(QWidget):
         self.table.setBorderRadius(8)
         self.table.setWordWrap(False)
         self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(['ID', '村庄名称', '操作'])
+        self.table.setHorizontalHeaderLabels(['ID', '堂区名称', '操作'])
         self.table.verticalHeader().hide()
         # 设置行高
         self.table.verticalHeader().setDefaultSectionSize(60)
@@ -94,7 +94,7 @@ class VillageWidget(QWidget):
         right_layout = QVBoxLayout()
         
         # 详细信息标题
-        detail_title = QLabel('村庄详细信息')
+        detail_title = QLabel('堂区详细信息')
         detail_title.setStyleSheet('font-size: 16px; font-weight: bold;')
         right_layout.addWidget(detail_title)
         
@@ -102,40 +102,40 @@ class VillageWidget(QWidget):
         self.detail_widget = QWidget()
         self.detail_layout = QFormLayout(self.detail_widget)
         
-        # 村庄名称
+        # 堂区名称
         self.name_label = QLabel()
         self.name_label.setStyleSheet('font-weight: 500;')
-        self.detail_layout.addRow('村庄名称:', self.name_label)
-        
+        self.detail_layout.addRow('堂区名称:', self.name_label)
+
         # 建立日期
         self.establishment_date_label = QLabel()
         self.establishment_date_label.setStyleSheet('font-weight: 500;')
         self.detail_layout.addRow('建立日期:', self.establishment_date_label)
-        
-        # 村庄神父
+
+        # 堂区神父
         self.village_priest_label = QLabel()
         self.village_priest_label.setStyleSheet('font-weight: 500;')
-        self.detail_layout.addRow('村庄神父:', self.village_priest_label)
-        
-        # 村庄地址
+        self.detail_layout.addRow('堂区神父:', self.village_priest_label)
+
+        # 堂区地址
         self.address_label = QLabel()
         self.address_label.setStyleSheet('font-weight: 500;')
         self.address_label.setWordWrap(True)
-        self.detail_layout.addRow('村庄地址:', self.address_label)
-        
-        # 村庄简介
+        self.detail_layout.addRow('堂区地址:', self.address_label)
+
+        # 堂区简介
         self.description_label = QLabel()
         self.description_label.setStyleSheet('font-weight: 500;')
         self.description_label.setWordWrap(True)
         self.description_label.setMinimumHeight(80)
-        self.detail_layout.addRow('村庄简介:', self.description_label)
-        
-        # 村庄照片
+        self.detail_layout.addRow('堂区简介:', self.description_label)
+
+        # 堂区照片
         self.photo_label = QLabel('暂无图片')
         self.photo_label.setFixedSize(200, 200)
         self.photo_label.setStyleSheet('border: 1px solid #ddd;')
         self.photo_label.setAlignment(Qt.AlignCenter)
-        self.detail_layout.addRow('村庄照片:', self.photo_label)
+        self.detail_layout.addRow('堂区照片:', self.photo_label)
         
         # 初始状态下禁用详细信息
         self.detail_widget.setEnabled(False)
@@ -151,7 +151,7 @@ class VillageWidget(QWidget):
         # 清空表格
         self.table.setRowCount(0)
         
-        # 加载村庄数据
+        # 加载堂区数据
         db = SessionLocal()
         try:
             villages = VillageService.get_all_villages(db)
@@ -180,7 +180,7 @@ class VillageWidget(QWidget):
             db.close()
     
     def on_village_selected(self):
-        """处理村庄选择事件，更新详细信息"""
+        """处理堂区选择事件，更新详细信息"""
         selected_items = self.table.selectedItems()
         if not selected_items:
             # 无选择时清空详细信息
@@ -188,11 +188,11 @@ class VillageWidget(QWidget):
             self.detail_widget.setEnabled(False)
             return
         
-        # 获取选中的村庄ID
+        # 获取选中的堂区ID
         selected_row = selected_items[0].row()
         village_id = int(self.table.item(selected_row, 0).text())
-        
-        # 从数据库获取村庄详情
+
+        # 从数据库获取堂区详情
         db = SessionLocal()
         try:
             village = VillageService.get_village_by_id(db, village_id)
@@ -238,29 +238,29 @@ class VillageWidget(QWidget):
     
     def add_village(self):
         # 创建对话框
-        dialog = Dialog('添加村庄', '请输入村庄信息', self)
-        
+        dialog = Dialog('添加堂区', '请输入堂区信息', self)
+
         # 创建内容 widget
         content = QWidget()
         layout = QFormLayout(content)
-        
+
         name_edit = QLineEdit()
-        layout.addRow('村庄名称:', name_edit)
-        
+        layout.addRow('堂区名称:', name_edit)
+
         # 新增字段
         establishment_date_edit = QDateEdit()
         establishment_date_edit.setCalendarPopup(True)
         establishment_date_edit.setDate(QDate.currentDate())
         layout.addRow('建立日期:', establishment_date_edit)
-        
+
         village_priest_edit = QLineEdit()
-        layout.addRow('村庄神父:', village_priest_edit)
-        
+        layout.addRow('堂区神父:', village_priest_edit)
+
         address_edit = QLineEdit()
-        layout.addRow('村庄地址:', address_edit)
-        
+        layout.addRow('堂区地址:', address_edit)
+
         description_edit = QTextEdit()
-        layout.addRow('村庄简介:', description_edit)
+        layout.addRow('堂区简介:', description_edit)
         
         # 照片上传
         photo_layout = QHBoxLayout()
@@ -283,7 +283,7 @@ class VillageWidget(QWidget):
         photo_btn = PushButton('选择照片')
         photo_btn.clicked.connect(select_photo)
         photo_layout.addWidget(photo_btn)
-        layout.addRow('村庄照片:', photo_layout)
+        layout.addRow('堂区照片:', photo_layout)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -304,16 +304,16 @@ class VillageWidget(QWidget):
             if name and village_priest and address:
                 db = SessionLocal()
                 try:
-                    # 自动生成村庄代码
+                    # 自动生成堂区代码
                     import time
                     code = f"V{int(time.time())}"
-                    
+
                     # 保存照片
                     photo_filename = self.save_photo(photo_path)
                     VillageService.create_village(
-                        db, 
-                        name=name, 
-                        code=code, 
+                        db,
+                        name=name,
+                        code=code,
                         establishment_date=establishment_date,
                         village_priest=village_priest,
                         address=address,
@@ -325,7 +325,7 @@ class VillageWidget(QWidget):
                     db.rollback()
                     InfoBar.error(
                         title='添加失败',
-                        content='村庄代码已存在，请使用其他代码',
+                        content='堂区代码已存在，请使用其他代码',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -333,7 +333,7 @@ class VillageWidget(QWidget):
                     db.rollback()
                     InfoBar.error(
                         title='添加失败',
-                        content=f'添加村庄失败: {str(e)}',
+                        content=f'添加堂区失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -342,15 +342,15 @@ class VillageWidget(QWidget):
     
     def edit_village(self, village):
         # 创建对话框
-        dialog = Dialog('编辑村庄', '请修改村庄信息', self)
-        
+        dialog = Dialog('编辑堂区', '请修改堂区信息', self)
+
         # 创建内容 widget
         content = QWidget()
         layout = QFormLayout(content)
-        
+
         name_edit = QLineEdit(village.name)
-        layout.addRow('村庄名称:', name_edit)
-        
+        layout.addRow('堂区名称:', name_edit)
+
         # 新增字段
         establishment_date_edit = QDateEdit()
         establishment_date_edit.setCalendarPopup(True)
@@ -359,15 +359,15 @@ class VillageWidget(QWidget):
         else:
             establishment_date_edit.setDate(QDate.currentDate())
         layout.addRow('建立日期:', establishment_date_edit)
-        
+
         village_priest_edit = QLineEdit(village.village_priest)
-        layout.addRow('村庄神父:', village_priest_edit)
-        
+        layout.addRow('堂区神父:', village_priest_edit)
+
         address_edit = QLineEdit(village.address)
-        layout.addRow('村庄地址:', address_edit)
-        
+        layout.addRow('堂区地址:', address_edit)
+
         description_edit = QTextEdit(village.description or '')
-        layout.addRow('村庄简介:', description_edit)
+        layout.addRow('堂区简介:', description_edit)
         
         # 照片上传
         photo_layout = QHBoxLayout()
@@ -405,7 +405,7 @@ class VillageWidget(QWidget):
         photo_btn = PushButton('选择照片')
         photo_btn.clicked.connect(select_photo)
         photo_layout.addWidget(photo_btn)
-        layout.addRow('村庄照片:', photo_layout)
+        layout.addRow('堂区照片:', photo_layout)
         
         # 替换对话框内容
         dialog.vBoxLayout.removeWidget(dialog.contentLabel)
@@ -443,7 +443,7 @@ class VillageWidget(QWidget):
                     db.rollback()
                     InfoBar.error(
                         title='修改失败',
-                        content='村庄代码已存在，请使用其他代码',
+                        content='堂区代码已存在，请使用其他代码',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -451,7 +451,7 @@ class VillageWidget(QWidget):
                     db.rollback()
                     InfoBar.error(
                         title='修改失败',
-                        content=f'修改村庄失败: {str(e)}',
+                        content=f'修改堂区失败: {str(e)}',
                         parent=self,
                         position=InfoBarPosition.TOP
                     )
@@ -461,21 +461,21 @@ class VillageWidget(QWidget):
     def delete_village(self, village):
         db = SessionLocal()
         try:
-            # 重新从数据库获取村庄对象，避免DetachedInstanceError
+            # 重新从数据库获取堂区对象，避免DetachedInstanceError
             village_obj = VillageService.get_village_by_id(db, village.id)
             if not village_obj:
                 return
-            
+
             # 检查是否有家庭
             if village_obj.households:
                 InfoBar.error(
                     title='删除失败',
-                    content='该村庄下有家庭，需删除所有家庭后才能删除村庄',
+                    content='该堂区下有家庭，需删除所有家庭后才能删除堂区',
                     parent=self,
                     position=InfoBarPosition.TOP
                 )
                 return
-            
+
             if VillageService.delete_village(db, village.id):
                 self.load_villages()
         finally:

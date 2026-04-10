@@ -23,10 +23,9 @@ class Village(Base):
 
 class Household(Base):
     __tablename__ = 'households'
-    
+
     id = Column(Integer, primary_key=True, index=True)
     village_id = Column(Integer, ForeignKey('villages.id'), nullable=False)
-    household_code = Column(String(20), nullable=False, index=True)
     plot_number = Column(Integer, nullable=False)
     address = Column(String(200), nullable=False)
     phone = Column(String(20))
