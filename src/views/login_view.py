@@ -8,7 +8,7 @@ class LoginView(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('户籍管理系统 - 登录')
+        self.setWindowTitle('天主教教籍管理系统 - 登录')
         self.setGeometry(100, 100, 400, 300)
         self.init_ui()
     
@@ -17,7 +17,7 @@ class LoginView(QWidget):
         layout.setAlignment(Qt.AlignCenter)
         
         # 标题
-        title_label = QLabel('户籍管理系统')
+        title_label = QLabel('天主教教籍管理系统')
         title_label.setStyleSheet('font-size: 24px; font-weight: bold;')
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)

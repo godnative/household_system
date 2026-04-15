@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-这是一个基于 PyQt5 开发的天主教堂家庭户籍管理系统，用于管理堂区、家庭成员信息及圣事记录（圣洗、坚振、婚配、病人傅油等）。采用 MVC 架构，使用 SQLAlchemy ORM 和 SQLite 数据库，实现了基于角色的权限控制系统（RBAC）。
+这是一个基于 PyQt5 开发的天主教堂家庭教籍管理系统，用于管理堂区、家庭成员信息及圣事记录（圣洗、坚振、婚配、病人傅油等）。采用 MVC 架构，使用 SQLAlchemy ORM 和 SQLite 数据库，实现了基于角色的权限控制系统（RBAC）。
 
 ## 常用命令
 
