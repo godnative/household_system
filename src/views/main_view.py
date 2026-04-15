@@ -6,7 +6,7 @@ from src.views.household_management_view import HouseholdManagementWidget
 from src.views.settings_view import SettingsView
 from src.views.user_role_management_view import UserRoleManagementView
 from src.services.auth_service import AuthService
-from src.constants import PERM_VILLAGE_MANAGE, PERM_HOUSEHOLD_MANAGE, PERM_HOUSEHOLD_VIEW
+from src.constants import PERM_VILLAGE_MANAGE, PERM_HOUSEHOLD_MANAGE, PERM_HOUSEHOLD_VIEW, PERM_MEMBER_MANAGE, PERM_MEMBER_VIEW
 
 class MainView(MSFluentWindow):
     logout = pyqtSignal()
@@ -55,6 +55,16 @@ class MainView(MSFluentWindow):
             household_management_page = HouseholdManagementWidget(self.user, self)
             household_management_page.setObjectName('household_management')
             self.addSubInterface(household_management_page, FIF.IOT, '家庭管理')
+
+        # 搜索功能（有家庭或成员查看/管理权限的用户）
+        if (AuthService.check_permission(self.user, PERM_HOUSEHOLD_VIEW) or
+            AuthService.check_permission(self.user, PERM_HOUSEHOLD_MANAGE) or
+            AuthService.check_permission(self.user, PERM_MEMBER_VIEW) or
+            AuthService.check_permission(self.user, PERM_MEMBER_MANAGE)):
+            from src.views.search_view import SearchView
+            search_page = SearchView(self.user, self)
+            search_page.setObjectName('search')
+            self.addSubInterface(search_page, FIF.SEARCH, '搜索')
 
         # 退出按钮
         self.navigationInterface.addItem(
