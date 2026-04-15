@@ -31,18 +31,6 @@ class MainView(MSFluentWindow):
         # 添加欢迎页面
         self.addSubInterface(welcome_page, FIF.HOME, '主页')
 
-        # 用户角色管理（所有用户都能访问，但内容不同）
-        user_role_page = UserRoleManagementView(self.user, self)
-        user_role_page.setObjectName('user_role')
-        self.addSubInterface(user_role_page, FIF.PEOPLE, '用户角色管理')
-
-        # 系统设置（超级管理员）
-        if AuthService.check_permission(self.user, 'user_manage') or AuthService.check_permission(self.user, 'role_manage'):
-            # 创建系统设置页面
-            settings_page = SettingsView(self)
-            settings_page.setObjectName('settings')
-            self.addSubInterface(settings_page, FIF.SETTING, '系统设置')
-
         # 堂区管理（超级管理员）
         if AuthService.check_permission(self.user, PERM_VILLAGE_MANAGE):
             village_page = VillageWidget(self)
@@ -66,6 +54,17 @@ class MainView(MSFluentWindow):
             search_page.setObjectName('search')
             self.addSubInterface(search_page, FIF.SEARCH, '搜索')
 
+        # 用户角色管理（所有用户都能访问，但内容不同）
+        user_role_page = UserRoleManagementView(self.user, self)
+        user_role_page.setObjectName('user_role')
+        self.addSubInterface(user_role_page, FIF.PEOPLE, '用户角色管理')
+
+        # 系统设置（超级管理员）
+        if AuthService.check_permission(self.user, 'user_manage') or AuthService.check_permission(self.user, 'role_manage'):
+            # 创建系统设置页面
+            settings_page = SettingsView(self)
+            settings_page.setObjectName('settings')
+            self.addSubInterface(settings_page, FIF.SETTING, '系统设置')
         # 退出按钮
         self.navigationInterface.addItem(
             routeKey='logout',
