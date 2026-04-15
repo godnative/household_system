@@ -23,14 +23,6 @@ static/member_photos/
 static/village_photos/
 src/static/member_photos/
 src/static/village_photos/
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.bmp
-*.ico
-*.svg
-*.webp
 
 # 忽略PyInstaller生成的文件
 app.spec
