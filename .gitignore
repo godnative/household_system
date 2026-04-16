@@ -34,3 +34,6 @@ app.spec
 # 忽略操作系统相关文件
 Thumbs.db
 .DS_Store
+
+# 忽略参考文件
+reference/
