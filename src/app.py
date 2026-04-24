@@ -3,17 +3,19 @@ from PyQt5.QtWidgets import QApplication
 from src.views.login_view import LoginView
 from src.views.main_view import MainView
 from src.models import SessionLocal, User, Role, Permission
+from src.models.init_db import ensure_database_initialized
 
 class App(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
+        ensure_database_initialized()
         self.user = None
         self.main_window = None
         self.login_window = None
-        
+
         # 检查是否有debug参数
         debug_mode = '--debug' in argv
-        
+
         if debug_mode:
             # 调试模式：跳过登录，直接进入主界面
             self.create_default_user()

@@ -7,6 +7,11 @@ venv/
 env/
 ENV/
 .venv/
+.venv-pyqt/
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
 
 # 忽略构建和分发目录
 build/
@@ -15,8 +20,20 @@ dist/
 # 忽略Trae相关文件
 .trae/
 
+# 忽略运行时目录
+runtime/
+
 # 忽略数据库文件
 data/
+*.db
+household_system_web.db
+backend/household_system_web.db
+
+# 忽略测试产物
+backend/test-results/
+
+# 忽略本地环境文件
+backend/.env
 
 # 忽略上传的图片文件
 static/member_photos/

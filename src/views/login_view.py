@@ -102,9 +102,9 @@ class LoginView(FramelessWindow):
         """窗口大小改变事件"""
         super().resizeEvent(event)
         # 如果背景标签有图片，重新缩放
-        if not self.ui.backgroundLabel.pixmap().isNull():
+        pixmap = self.ui.backgroundLabel.pixmap()
+        if pixmap is not None and not pixmap.isNull():
             # 保持原图比例，填充整个标签
-            pixmap = self.ui.backgroundLabel.pixmap()
             scaled_pixmap = pixmap.scaled(
                 self.ui.backgroundLabel.size(),
                 Qt.KeepAspectRatioByExpanding,

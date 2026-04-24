@@ -211,7 +211,106 @@ mkdir data
 mkdir -p data
 ```
 
-### 2.3 初始化数据库
+## 2.5 一键脚本使用说明
+
+项目现已提供 **Web 项目** 与 **PyQt5 桌面项目** 两套独立脚本，分别用于环境准备、启动、关闭与状态查看。
+
+### Web 项目脚本
+
+#### 1. 一键准备 Web 环境
+
+```bash
+bash scripts/web/setup.sh
+```
+
+该脚本会执行：
+- 创建或复用 `backend/.venv`
+- 安装 `backend/requirements.txt`
+- 若不存在则创建 `backend/.env`
+- 安装 `frontend` 依赖
+- 若不存在则创建 `frontend/.env`
+
+> 注意：本地脚本默认使用 **SQLite 开发配置**，可直接用于本地验收；如需切换到 PostgreSQL，请手动修改 `backend/.env` 中的 `DATABASE_URL`。
+
+#### 2. 启动 Web 项目
+
+```bash
+bash scripts/web/start.sh
+```
+
+默认行为：
+- 启动后端：`http://127.0.0.1:8000`
+- 启动前端：`http://127.0.0.1:5173`
+- 将日志写入：`runtime/web/logs/`
+- 将 PID 写入：`runtime/web/pids/`
+
+#### 3. 查看 Web 运行状态
+
+```bash
+bash scripts/web/status.sh
+```
+
+#### 4. 关闭 Web 项目
+
+```bash
+bash scripts/web/stop.sh
+```
+
+脚本会优先按 PID 文件安全关闭前后端进程，不会默认粗暴地全局杀掉 Python 或 Node 进程。
+
+### PyQt5 桌面项目脚本
+
+#### 1. 一键准备 PyQt5 环境
+
+```bash
+bash scripts/pyqt/setup.sh
+```
+
+该脚本会执行：
+- 创建或复用独立虚拟环境 `.venv-pyqt`
+- 安装根目录 `requirements.txt`
+- 检测图形环境（`DISPLAY` / `WAYLAND_DISPLAY`）
+
+#### 2. 启动 PyQt5 桌面端
+
+```bash
+bash scripts/pyqt/start.sh
+```
+
+如需调试模式：
+
+```bash
+bash scripts/pyqt/start.sh --debug
+```
+
+默认行为：
+- 使用 `.venv-pyqt` 中的 Python 启动 `src.app`
+- 将日志写入：`runtime/pyqt/logs/`
+- 将 PID 写入：`runtime/pyqt/pids/`
+
+> 注意：若当前环境没有图形界面（未设置 `DISPLAY` 或 `WAYLAND_DISPLAY`），桌面端脚本会拒绝启动 GUI；若缺少登录页背景资源，系统会回退到默认样式而不会报错。
+
+#### 3. 查看 PyQt5 运行状态
+
+```bash
+bash scripts/pyqt/status.sh
+```
+
+#### 4. 关闭 PyQt5 桌面端
+
+```bash
+bash scripts/pyqt/stop.sh
+```
+
+### 常见注意事项
+
+- `setup.sh` 可重复执行，不会覆盖已有 `.env`。
+- `start.sh` 会检测是否已启动，避免重复拉起。
+- `stop.sh` 可重复执行，若进程已停止会自动清理陈旧 PID。
+- 运行时日志与 PID 文件位于 `runtime/`，该目录已建议加入 Git 忽略。
+- Web 项目与 PyQt5 项目使用 **独立虚拟环境**，避免依赖冲突。
+
+### 2.6 初始化数据库
 
 在首次运行前，必须初始化数据库：
 
@@ -235,7 +334,7 @@ python -m src.models.init_db
 数据库初始化成功！
 ```
 
-### 2.4 运行应用
+### 2.7 运行应用
 
 #### 正常模式（需要登录）
 

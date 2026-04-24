@@ -6,7 +6,13 @@ import os
 # 数据库文件路径
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'household.db')
 
-# 创建数据库引擎
+
+
+def ensure_database_parent_dir_exists():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+
+
+ensure_database_parent_dir_exists()
 engine = create_engine(f'sqlite:///{DB_PATH}', echo=False)
 
 # 创建会话工厂

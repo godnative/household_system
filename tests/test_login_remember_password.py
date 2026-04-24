@@ -105,6 +105,8 @@ def test_load_last_login_info_restores_fields_and_checkbox(login_view):
     assert login_view.ui.rememberCheckBox.isChecked() is True
 
 
+
+
 def test_clear_last_login_info_removes_saved_file(login_view):
     """测试取消记住密码后会删除保存的登录信息"""
     login_view.saveLastLoginInfo('tester', 'secret123')
@@ -115,3 +117,10 @@ def test_clear_last_login_info_removes_saved_file(login_view):
     login_view.clearLastLoginInfo()
 
     assert not os.path.exists(config_file)
+
+
+def test_resize_event_ignores_missing_background_pixmap(login_view):
+    """测试背景图缺失时 resizeEvent 不会因空 pixmap 报错"""
+    login_view.resize(1200, 720)
+
+    assert login_view.ui.usernameLineEdit is not None

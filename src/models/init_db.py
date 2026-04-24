@@ -1,12 +1,106 @@
+from datetime import date
+
 from . import create_tables, Role, Permission, User, Village
-from .base import SessionLocal
+from .base import SessionLocal, ensure_database_parent_dir_exists
 from src.constants import (
     PERM_USER_MANAGE, PERM_ROLE_MANAGE, PERM_VILLAGE_MANAGE,
     PERM_HOUSEHOLD_MANAGE, PERM_HOUSEHOLD_VIEW,
     PERM_MEMBER_MANAGE, PERM_MEMBER_VIEW,
     ROLE_SUPER_ADMIN, ROLE_DATA_ENTRY, ROLE_OBSERVER
 )
-import bcrypt
+from src.services.auth_service import AuthService
+
+DEFAULT_PERMISSIONS = [
+    (PERM_USER_MANAGE, '用户管理权限'),
+    (PERM_ROLE_MANAGE, '角色管理权限'),
+    (PERM_VILLAGE_MANAGE, '堂区管理权限'),
+    (PERM_HOUSEHOLD_MANAGE, '家庭完整管理权限'),
+    (PERM_HOUSEHOLD_VIEW, '家庭查看权限'),
+    (PERM_MEMBER_MANAGE, '成员完整管理权限'),
+    (PERM_MEMBER_VIEW, '成员查看权限'),
+]
+
+DEFAULT_ROLES = {
+    ROLE_SUPER_ADMIN: [
+        PERM_USER_MANAGE,
+        PERM_ROLE_MANAGE,
+        PERM_VILLAGE_MANAGE,
+        PERM_HOUSEHOLD_MANAGE,
+        PERM_HOUSEHOLD_VIEW,
+        PERM_MEMBER_MANAGE,
+        PERM_MEMBER_VIEW,
+    ],
+    ROLE_DATA_ENTRY: [PERM_HOUSEHOLD_MANAGE, PERM_MEMBER_MANAGE],
+    ROLE_OBSERVER: [PERM_HOUSEHOLD_VIEW, PERM_MEMBER_VIEW],
+}
+
+DEFAULT_VILLAGE = {
+    'name': '默认村',
+    'code': '001',
+    'establishment_date': date.today(),
+    'village_priest': '默认神父',
+    'address': '默认地址',
+    'description': '系统默认村',
+}
+
+DEFAULT_ADMIN = {
+    'username': 'admin',
+    'password': 'admin123',
+    'role': ROLE_SUPER_ADMIN,
+}
+
+
+def ensure_seed_data(db):
+    permissions = {permission.name: permission for permission in db.query(Permission).all()}
+    for key, description in DEFAULT_PERMISSIONS:
+        if key not in permissions:
+            permission = Permission(name=key, description=description)
+            db.add(permission)
+            permissions[key] = permission
+    db.flush()
+
+    roles = {role.name: role for role in db.query(Role).all()}
+    for role_name, permission_keys in DEFAULT_ROLES.items():
+        role = roles.get(role_name)
+        if role is None:
+            role = Role(name=role_name, description=role_name)
+            db.add(role)
+            roles[role_name] = role
+        role.permissions = [permissions[key] for key in permission_keys]
+    db.flush()
+
+    village = db.query(Village).filter(Village.code == DEFAULT_VILLAGE['code']).first()
+    if village is None:
+        village = db.query(Village).filter(Village.name == DEFAULT_VILLAGE['name']).first()
+    if village is None:
+        village = Village(**DEFAULT_VILLAGE)
+        db.add(village)
+        db.flush()
+
+    admin = AuthService.get_user_by_username(db, DEFAULT_ADMIN['username'])
+    if admin is None:
+        admin = User(
+            username=DEFAULT_ADMIN['username'],
+            password_hash=AuthService.get_password_hash(DEFAULT_ADMIN['password']),
+            role_id=roles[DEFAULT_ADMIN['role']].id
+        )
+        db.add(admin)
+
+    db.commit()
+
+
+def ensure_database_initialized():
+    ensure_database_parent_dir_exists()
+    create_tables()
+    db = SessionLocal()
+    try:
+        ensure_seed_data(db)
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
 
 def init_database():
     # 强制删除并重新创建表结构
@@ -14,88 +108,19 @@ def init_database():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
-    # 创建数据库会话
     db = SessionLocal()
-
     try:
-        # 检查是否已有数据
-        if db.query(Role).count() == 0:
-            # 创建默认权限
-            permissions = [
-                Permission(name=PERM_USER_MANAGE, description='用户管理权限'),
-                Permission(name=PERM_ROLE_MANAGE, description='角色管理权限'),
-                Permission(name=PERM_VILLAGE_MANAGE, description='堂区管理权限'),
-                Permission(name=PERM_HOUSEHOLD_MANAGE, description='家庭完整管理权限'),
-                Permission(name=PERM_HOUSEHOLD_VIEW, description='家庭查看权限'),
-                Permission(name=PERM_MEMBER_MANAGE, description='成员完整管理权限'),
-                Permission(name=PERM_MEMBER_VIEW, description='成员查看权限')
-            ]
-            db.add_all(permissions)
-            db.commit()
-
-            # 刷新以获取ID
-            for p in permissions:
-                db.refresh(p)
-
-            # 创建默认角色
-            # 1. 超级管理员 - 拥有所有权限
-            super_admin_role = Role(name=ROLE_SUPER_ADMIN, description='拥有所有权限')
-            super_admin_role.permissions = permissions
-            db.add(super_admin_role)
-
-            # 2. 录入员 - 可以完整管理指定堂区的数据
-            data_entry_role = Role(name=ROLE_DATA_ENTRY, description='可以管理指定堂区的家庭和成员数据')
-            data_entry_role.permissions = [p for p in permissions
-                                          if p.name in [PERM_HOUSEHOLD_MANAGE, PERM_MEMBER_MANAGE]]
-            db.add(data_entry_role)
-
-            # 3. 观察员 - 只能查看指定堂区的数据
-            observer_role = Role(name=ROLE_OBSERVER, description='只能查看指定堂区的家庭和成员数据')
-            observer_role.permissions = [p for p in permissions
-                                        if p.name in [PERM_HOUSEHOLD_VIEW, PERM_MEMBER_VIEW]]
-            db.add(observer_role)
-
-            db.commit()
-
-            # 刷新角色以获取ID
-            db.refresh(super_admin_role)
-            db.refresh(data_entry_role)
-            db.refresh(observer_role)
-
-            # 创建默认超级管理员用户
-            hashed_password = bcrypt.hashpw('admin123'.encode('utf-8'), bcrypt.gensalt())
-            admin_user = User(
-                username='admin',
-                password_hash=hashed_password.decode('utf-8'),
-                role_id=super_admin_role.id
-            )
-            db.add(admin_user)
-            db.commit()
-
-            # 创建默认村
-            from datetime import date
-            default_village = Village(
-                name='默认村',
-                code='001',
-                establishment_date=date.today(),
-                village_priest='默认神父',
-                address='默认地址',
-                description='系统默认村'
-            )
-            db.add(default_village)
-            db.commit()
-
-            print('数据库初始化成功！')
-            print(f'创建了 {len(permissions)} 个权限')
-            print(f'创建了 3 个角色：{ROLE_SUPER_ADMIN}、{ROLE_DATA_ENTRY}、{ROLE_OBSERVER}')
-            print('创建了默认超级管理员用户（用户名: admin，密码: admin123）')
-        else:
-            print('数据库已有数据，跳过初始化。')
+        ensure_seed_data(db)
+        print('数据库初始化成功！')
+        print(f'创建了 {len(DEFAULT_PERMISSIONS)} 个权限')
+        print(f'创建了 3 个角色：{ROLE_SUPER_ADMIN}、{ROLE_DATA_ENTRY}、{ROLE_OBSERVER}')
+        print('创建了默认超级管理员用户（用户名: admin，密码: admin123）')
     except Exception as e:
         print(f'数据库初始化失败: {e}')
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == '__main__':
     init_database()
