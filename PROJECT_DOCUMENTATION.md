@@ -258,6 +258,46 @@ bash scripts/web/stop.sh
 
 脚本会优先按 PID 文件安全关闭前后端进程，不会默认粗暴地全局杀掉 Python 或 Node 进程。
 
+#### 5. Windows 离线安装包
+
+Web 端现已支持面向 **Windows** 的离线安装打包，目标是：
+- 不要求用户额外安装 Python、Node、pnpm
+- 默认使用本地 SQLite
+- 安装后可通过快捷方式或批处理 **一键启动 / 一键关闭**
+
+相关文件：
+- Windows 启动脚本：`scripts/web/windows/start.bat`
+- Windows 关闭脚本：`scripts/web/windows/stop.bat`
+- Windows 状态脚本：`scripts/web/windows/status.bat`
+- Windows 构建脚本：`scripts/web/windows/build-package.bat`
+- Inno Setup 安装器脚本：`scripts/web/windows/HouseholdSystemWeb.iss`
+- 后端正式依赖：`backend/requirements-prod.txt`
+
+构建步骤（建议在 Windows 构建机执行）：
+
+```bat
+scripts\web\windows\build-package.bat
+```
+
+该构建流程会：
+- 执行前端生产构建，生成 `frontend/dist`
+- 将后端打包为 Windows 可执行产物
+- 组装离线发布目录 `dist/windows-web/`
+- 拷贝 Windows 启停脚本与安装器脚本
+
+安装包运行方式：
+- 安装后通过“启动 Web 端”入口启动本地服务
+- 默认访问地址：`http://127.0.0.1:8000`
+- 前端静态资源由后端托管，不再依赖 `pnpm dev`
+- 本地数据、上传文件、日志与 PID 文件默认写入 `%LOCALAPPDATA%\HouseholdSystemWeb\`
+
+打包排除项：
+- `backend/tests/`
+- `frontend/e2e/`
+- `frontend/node_modules/`
+- Playwright / pytest 等测试相关内容
+- 本地运行日志、PID、patch 文件
+
 ### PyQt5 桌面项目脚本
 
 #### 1. 一键准备 PyQt5 环境

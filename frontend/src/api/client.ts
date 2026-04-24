@@ -3,8 +3,10 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import router from '../router'
 
+const apiBaseURL = import.meta.env.VITE_API_BASE_URL?.trim() || '/'
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+  baseURL: apiBaseURL,
   timeout: 10000,
 })
 
