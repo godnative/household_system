@@ -190,7 +190,6 @@ class TestMemberServiceCRUD:
 class TestMemberServiceSearch:
     """成员搜索测试"""
 
-    @pytest.mark.skip(reason="member_service.search_members() 使用不存在的 id_number 字段，需要修复源代码")
     def test_search_members_by_name(self, test_db_with_data):
         """测试按姓名搜索成员"""
         data = test_db_with_data
@@ -232,7 +231,6 @@ class TestMemberServiceSearch:
 
         assert len(members) == 2
 
-    @pytest.mark.skip(reason="member_service.search_members() 使用不存在的 id_number 字段")
     def test_search_members_no_results(self, test_db_with_data):
         """测试无结果搜索"""
         data = test_db_with_data
@@ -247,7 +245,6 @@ class TestMemberServiceSearch:
 class TestMemberServiceIntegration:
     """成员服务集成测试"""
 
-    @pytest.mark.skip(reason="member_service.search_members() 使用不存在的 id_number 字段")
     def test_create_and_retrieve_member(self, test_db_with_data):
         """测试创建后立即检索"""
         data = test_db_with_data

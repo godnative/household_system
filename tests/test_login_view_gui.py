@@ -39,11 +39,12 @@ def test_login_view_initialization(app):
     login_window = LoginView()
     try:
         assert login_window is not None
-        assert login_window.ui is not None
-        assert login_window.ui.usernameLineEdit is not None
-        assert login_window.ui.passwordLineEdit is not None
-        assert login_window.ui.rememberCheckBox is not None
-        assert login_window.ui.loginButton is not None
+        assert hasattr(login_window, 'username_input')
+        assert hasattr(login_window, 'password_input')
+        assert hasattr(login_window, 'login_button')
+        assert login_window.username_input is not None
+        assert login_window.password_input is not None
+        assert login_window.login_button is not None
     finally:
         login_window.close()
         login_window.deleteLater()

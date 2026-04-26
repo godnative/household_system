@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 # 数据库文件路径
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'household.db')
@@ -13,7 +12,8 @@ engine = create_engine(f'sqlite:///{DB_PATH}', echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 创建基础模型类
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 # 依赖项：获取数据库会话
 def get_db():

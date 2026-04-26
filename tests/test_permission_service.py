@@ -260,7 +260,6 @@ class TestPermissionServiceVillageAccess:
         assert villages['village1'].id in accessible_ids
         assert villages['village2'].id in accessible_ids
 
-    @pytest.mark.skip(reason="permission_service.assign_villages_to_user() 使用 raw SQL delete 导致 StaleDataError")
     def test_assign_villages_clears_existing(self, test_db_with_data):
         """测试分配堂区会清除现有权限"""
         data = test_db_with_data

@@ -22,11 +22,6 @@ class MemberService:
         return db.query(Member).filter(Member.id == member_id).first()
     
     @staticmethod
-    def get_member_by_id_number(db: Session, id_number: str) -> Member:
-        """根据身份证号获取成员"""
-        return db.query(Member).filter(Member.id_number == id_number).first()
-    
-    @staticmethod
     def search_members(db: Session, keyword: str = None, household_id: int = None, village_id: int = None):
         """搜索成员"""
         query = db.query(Member)
@@ -39,8 +34,8 @@ class MemberService:
         if keyword:
             query = query.filter(
                 Member.name.ilike(f'%{keyword}%') |
-                Member.id_number.ilike(f'%{keyword}%') |
-                Member.relation_to_head.ilike(f'%{keyword}%')
+                Member.relation_to_head.ilike(f'%{keyword}%') |
+                Member.church_id.ilike(f'%{keyword}%')
             )
         
         return query.all()

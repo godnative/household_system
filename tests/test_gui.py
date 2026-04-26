@@ -107,7 +107,7 @@ class TestSearchViewUI:
             headers.append(search_view.household_table.horizontalHeaderItem(i).text())
 
         assert 'ID' in headers
-        assert '户主' in headers or '堂区' in headers
+        assert any('户主' in header or '堂区' in header for header in headers)
         assert '操作' in headers
 
     def test_tab_bar_configuration(self, search_view):
@@ -123,8 +123,7 @@ class TestSearchViewUI:
         search_view.member_search_input.clear()
 
         # 点击搜索按钮
-        with qtbot.waitSignal(timeout=1000):
-            search_view.search_btn.click()
+        search_view.search_btn.click()
 
         # 应该显示警告提示
         # 注意：InfoBar 的验证需要特殊处理

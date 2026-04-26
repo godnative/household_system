@@ -83,9 +83,7 @@ class PermissionService:
             return None
 
         # 清除现有的堂区访问权限
-        db.execute(user_village_access.delete().where(
-            user_village_access.c.user_id == user_id
-        ))
+        user.accessible_villages = []
 
         # 添加新的堂区访问权限
         if village_ids:

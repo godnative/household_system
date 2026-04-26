@@ -13,6 +13,9 @@ from sqlalchemy.orm import sessionmaker
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from PyQt5.QtWidgets import QApplication
+from qfluentwidgets import qconfig
+
 from src.models.base import Base
 from src.models.household import Village, Household, Member
 from src.models.auth import Role, Permission
@@ -23,6 +26,23 @@ from src.constants.permissions import (
     PERM_HOUSEHOLD_MANAGE, PERM_HOUSEHOLD_VIEW,
     PERM_MEMBER_MANAGE, PERM_MEMBER_VIEW
 )
+
+# 全局 QApplication 实例
+app = None
+
+@pytest.fixture(scope='session', autouse=True)
+def qt_app():
+    """创建全局 QApplication 实例"""
+    global app
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+    # 确保 qconfig 正确初始化
+    if not hasattr(qconfig, '_initialized'):
+        qconfig._initialized = True
+    yield app
+    # 不退出应用，让其他测试继续使用
+
 
 
 @pytest.fixture(scope='function')
@@ -294,3 +314,93 @@ def data_entry_user(test_db_with_data):
 def observer_user(test_db_with_data):
     """返回观察员用户"""
     return test_db_with_data['users']['observer']
+
+
+@pytest.fixture
+def login_view(qt_app, test_db):
+    """创建登录视图"""
+    from src.views.login_view import LoginView
+    view = LoginView()
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def main_view(qt_app, test_db_with_data, super_admin_user):
+    """创建主界面（超级管理员）"""
+    from src.views.main_view import MainView
+    view = MainView(super_admin_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def main_view_for_data_entry(qt_app, test_db_with_data, data_entry_user):
+    """创建主界面（录入员）"""
+    from src.views.main_view import MainView
+    view = MainView(data_entry_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def main_view_for_observer(qt_app, test_db_with_data, observer_user):
+    """创建主界面（观察员）"""
+    from src.views.main_view import MainView
+    view = MainView(observer_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def search_view(qt_app, test_db_with_data, super_admin_user):
+    """创建搜索视图"""
+    from src.views.search_view import SearchView
+    view = SearchView(super_admin_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def household_management_view(qt_app, test_db_with_data, super_admin_user):
+    """创建家庭管理视图"""
+    from src.views.household_management_view import HouseholdManagementWidget
+    view = HouseholdManagementWidget(super_admin_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def village_widget(qt_app, test_db_with_data, super_admin_user):
+    """创建堂区管理部件"""
+    from src.views.village_view import VillageWidget
+    view = VillageWidget()
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def user_role_view(qt_app, test_db_with_data, super_admin_user):
+    """创建用户角色管理视图（管理员）"""
+    from src.views.user_role_management_view import UserRoleManagementView
+    view = UserRoleManagementView(super_admin_user)
+    yield view
+    view.close()
+    view.deleteLater()
+
+
+@pytest.fixture
+def user_role_view_for_regular_user(qt_app, test_db_with_data, data_entry_user):
+    """创建用户角色管理视图（普通用户）"""
+    from src.views.user_role_management_view import UserRoleManagementView
+    view = UserRoleManagementView(data_entry_user)
+    yield view
+    view.close()
+    view.deleteLater()

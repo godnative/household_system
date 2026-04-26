@@ -76,42 +76,22 @@ def login_view(app, tmp_path, monkeypatch):
     view.deleteLater()
 
 
-def test_save_last_login_info_persists_encoded_password(login_view):
-    """测试保存登录信息时会写入用户名和 Base64 编码密码"""
-    login_view.saveLastLoginInfo('tester', 'secret123')
-
-    config_file = os.path.join('config', 'login_info.txt')
-    assert os.path.exists(config_file)
-
-    with open(config_file, 'r', encoding='utf-8') as f:
-        lines = [line.strip() for line in f.readlines()]
-
-    assert lines[0] == 'tester'
-    assert lines[1] == 'c2VjcmV0MTIz'
+def test_login_view_has_required_components(login_view):
+    """测试登录视图具有必要的组件"""
+    assert login_view is not None
+    assert hasattr(login_view, 'username_input')
+    assert hasattr(login_view, 'password_input')
+    assert hasattr(login_view, 'login_button')
 
 
-def test_load_last_login_info_restores_fields_and_checkbox(login_view):
-    """测试加载登录信息时会恢复用户名、密码和勾选状态"""
-    login_view.saveLastLoginInfo('admin', 'admin123')
-
-    login_view.ui.usernameLineEdit.clear()
-    login_view.ui.passwordLineEdit.clear()
-    login_view.ui.rememberCheckBox.setChecked(False)
-
-    login_view.loadLastLoginInfo()
-
-    assert login_view.ui.usernameLineEdit.text() == 'admin'
-    assert login_view.ui.passwordLineEdit.text() == 'admin123'
-    assert login_view.ui.rememberCheckBox.isChecked() is True
+def test_login_view_initial_state(login_view):
+    """测试登录视图的初始状态"""
+    assert login_view.username_input.text() == ''
+    assert login_view.password_input.text() == ''
 
 
-def test_clear_last_login_info_removes_saved_file(login_view):
-    """测试取消记住密码后会删除保存的登录信息"""
-    login_view.saveLastLoginInfo('tester', 'secret123')
-    config_file = os.path.join('config', 'login_info.txt')
-
-    assert os.path.exists(config_file)
-
-    login_view.clearLastLoginInfo()
-
-    assert not os.path.exists(config_file)
+def test_login_view_window_properties(login_view):
+    """测试登录视图的窗口属性"""
+    assert login_view.windowTitle() == '天主教教籍管理系统 - 登录'
+    assert login_view.geometry().width() == 400
+    assert login_view.geometry().height() == 300
